@@ -11,11 +11,29 @@ import { NextResponse, type NextRequest } from "next/server";
 const VERCEL_PRODUCTION_ALIAS = "adcontact-pi.vercel.app";
 const CANONICAL_HOST = "www.adcontact.se";
 
-export function middleware(request: NextRequest) {
+// Legacy Magento action endpoints (wishlist, product-compare, ...) never had
+// a real page on this site and never will — the site has no cart/wishlist/
+// compare system at all. Every hit is a unique, one-off URL (a fabricated
+// form_key + product id), so it can NEVER be a cache hit no matter how well
+// the content routes are tuned; left alone, each one falls all the way
+// through to a full serverless function invocation just to return 404.
+// Found 2026-09-07 investigating a Vercel Edge Requests/Function Invocations
+// alert — a bot was replaying old Magento action URLs against the site.
+// Reject the confirmed-dead prefixes here instead, before they reach a
+// function. Extend this list if the same bot is later seen probing other
+// Magento-only paths (checkout/, customer/account/, etc.).
+const DEAD_MAGENTO_ACTION_PREFIXES = ["/wishlist/", "/catalog/product_compare/"];
+
+export function proxy(request: NextRequest) {
   if (request.nextUrl.hostname === VERCEL_PRODUCTION_ALIAS) {
     const url = new URL(request.nextUrl.pathname + request.nextUrl.search, `https://${CANONICAL_HOST}`);
     return NextResponse.redirect(url, 301);
   }
+
+  if (DEAD_MAGENTO_ACTION_PREFIXES.some((prefix) => request.nextUrl.pathname.startsWith(prefix))) {
+    return new NextResponse("Not found", { status: 404 });
+  }
+
   return NextResponse.next();
 }
 
