@@ -7,6 +7,7 @@ import {
 import { deutschProducts } from "@/data/deutschConnectors";
 import { resources } from "@/data/resources";
 import { brands } from "@/data/brands";
+import { usedMachines } from "@/data/usedMachines";
 
 /** Google's sitemap protocol caps a single file at 50,000 URLs. Stay comfortably
  *  under that so future catalogue growth doesn't silently overflow a chunk. */
@@ -60,6 +61,9 @@ const STATIC_PATHS: SitemapEntry[] = [
   { path: "/products/deutsch-connectors", priority: 0.8, changeFrequency: "weekly" },
   { path: "/products/te-connectivity", priority: 0.8, changeFrequency: "weekly" },
   { path: "/products/zoller-frohlich", priority: 0.8, changeFrequency: "weekly" },
+  { path: "/outlet", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/outlet/components", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/outlet/used-machines", priority: 0.7, changeFrequency: "weekly" },
 ];
 
 let cached: SitemapEntry[] | null = null;
@@ -85,6 +89,9 @@ export function getAllSitemapEntries(): SitemapEntry[] {
   for (const entry of STATIC_PATHS) add(entry);
   for (const r of resources) add({ path: `/resources/${r.slug}`, priority: 0.5, changeFrequency: "monthly" });
   for (const b of brands) add({ path: `/brands/${b.slug}`, priority: 0.5, changeFrequency: "monthly" });
+  for (const m of usedMachines) {
+    add({ path: `/outlet/used-machines/${m.slug}`, priority: 0.5, changeFrequency: "weekly" });
+  }
 
   for (const [path, route] of Object.entries(routes)) {
     if (route.type === "category") {
