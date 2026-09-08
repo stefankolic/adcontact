@@ -1,9 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Search, X, ChevronDown } from "lucide-react";
-import { deutschOutletComponents, outletComponentHref } from "@/data/deutschOutlet";
+import { Search, X, ChevronDown, Package } from "lucide-react";
+import {
+  deutschOutletComponents,
+  outletComponentHref,
+  outletComponentImageSrc,
+} from "@/data/deutschOutlet";
 
 const PAGE_SIZE = 50;
 
@@ -59,6 +64,9 @@ export default function OutletComponentsClient() {
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+              <th className="w-14 px-4 py-3">
+                <span className="sr-only">Photo</span>
+              </th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#374151]">
                 SKU
               </th>
@@ -79,8 +87,27 @@ export default function OutletComponentsClient() {
           <tbody className="divide-y divide-[#f1f5f9]">
             {shown.map((item) => {
               const href = outletComponentHref(item);
+              const imageSrc = outletComponentImageSrc(item);
               return (
                 <tr key={item.sku} className="hover:bg-[#f8fafc] transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="relative h-10 w-10 overflow-hidden rounded-md border border-[#e2e8f0] bg-[#f8fafc]">
+                      {imageSrc ? (
+                        <Image
+                          src={imageSrc}
+                          alt={item.description}
+                          fill
+                          unoptimized
+                          sizes="40px"
+                          className="object-contain p-1"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <Package size={16} strokeWidth={1.4} className="text-[#cbd5e1]" />
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs text-[#64748b]">{item.sku}</td>
                   <td className="px-4 py-3">
                     {href ? (
