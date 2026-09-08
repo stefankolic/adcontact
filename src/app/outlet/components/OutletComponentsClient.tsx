@@ -89,7 +89,10 @@ export default function OutletComponentsClient() {
               const href = outletComponentHref(item);
               const imageSrc = outletComponentImageSrc(item);
               return (
-                <tr key={item.sku} className="hover:bg-[#f8fafc] transition-colors">
+                <tr
+                  key={item.sku}
+                  className="odd:bg-white even:bg-[#f8fafc] hover:bg-[#f1f5f9] transition-colors"
+                >
                   <td className="px-4 py-3">
                     <div className="relative h-10 w-10 overflow-hidden rounded-md border border-[#e2e8f0] bg-[#f8fafc]">
                       {imageSrc ? (
