@@ -1,5 +1,4 @@
 import generatedItems from "./generated/deutsch-outlet.json";
-import { productDetailHref } from "@/lib/productHref";
 import { getUnifiedProduct } from "@/data/productLookup";
 
 /**
@@ -26,8 +25,17 @@ export type OutletComponent = {
 
 export const deutschOutletComponents = generatedItems as OutletComponent[];
 
+/** Links to the richer, dedicated Deutsch product page (full technical specs,
+ *  compatible contacts/mating connectors/accessories, CAD files) rather than
+ *  the generic cross-brand `/product/[sku]` page — outlet is Deutsch-only
+ *  today, and every `deutschProducts` entry has a page at this exact slug
+ *  (see `generateStaticParams` in that route), so no extra lookup is needed.
+ *  Found 2026-09-09: outlet rows were linking to the thin generic page while
+ *  a richer canonical one already existed for the same part. */
 export function outletComponentHref(item: OutletComponent): string | null {
-  return item.matchedPartNumber ? productDetailHref(item.matchedPartNumber) : null;
+  return item.matchedPartNumber
+    ? `/products/deutsch-connectors/${item.matchedPartNumber.toLowerCase()}`
+    : null;
 }
 
 // Treat Magento's "no photo"/placeholder graphic as no image, same convention

@@ -1,14 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
-import { ChevronRight, Clock, Package, Phone, Mail, Download, ArrowRight } from "lucide-react";
+import { ChevronRight, Clock, Package, Phone, Mail, ArrowRight } from "lucide-react";
 import {
   getUnifiedProduct,
   getRelatedProducts,
   productDetailHref,
 } from "@/data/productLookup";
-import { getProductDetail, type RelatedProduct } from "@/data/deutschProductDetails";
 import QuoteForm from "@/components/QuoteForm";
 import { brands } from "@/data/brands";
 
@@ -89,25 +88,26 @@ export default async function ProductPage({ params }: Props) {
   const product = getUnifiedProduct(sku);
   if (!product) notFound();
 
-  const detail =
-    product.brand === "Deutsch" ? getProductDetail(product.sku.toLowerCase()) : undefined;
-  const specs =
-    detail?.specs && Object.keys(detail.specs).length ? detail.specs : product.specs;
-  const image = cleanImage(detail?.largImageUrl ?? product.image);
+  // Deutsch has a richer dedicated page (full spec fallback to Magento
+  // attributes, compatible contacts/mating connectors/accessories, CAD
+  // files) — send it there instead of rendering this thinner generic
+  // template. Mirrors the same redirect in webshop/[...path]/page.tsx.
+  // Found 2026-09-09: outlet links were pointing here directly, landing
+  // visitors on a noticeably thinner page than the canonical one.
+  if (product.brand === "Deutsch") {
+    permanentRedirect(`/products/deutsch-connectors/${product.sku.toLowerCase()}`);
+  }
+
+  // No brand reaches this template with rich curated detail data today —
+  // Deutsch (the only brand `getProductDetail` covers) redirected above.
+  const specs = product.specs;
+  const image = cleanImage(product.image);
 
   const chips = Object.entries(specs)
     .filter(([k]) => k !== "Brand" && k !== "Part Number")
     .slice(0, 5);
 
   const related = getRelatedProducts(product, 6);
-  const deutschRelated: { title: string; items: RelatedProduct[] }[] = detail
-    ? [
-        { title: "Compatible contacts", items: detail.contacts },
-        { title: "Mating connectors", items: detail.matingConnectors },
-        { title: "Required components", items: detail.requiredComponents },
-        { title: "Accessories", items: detail.accessories },
-      ].filter((g) => g.items.length > 0)
-    : [];
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -204,13 +204,13 @@ export default async function ProductPage({ params }: Props) {
                 Request a quote
                 <ArrowRight size={15} />
               </a>
-              <a
+              <Link
                 href="/contact"
                 className="flex items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-6 py-3.5 font-medium text-[#374151] transition-colors hover:bg-[#f8fafc]"
               >
                 <Phone size={14} />
                 Call us
-              </a>
+              </Link>
               <a
                 href={`mailto:info@adcontact.se?subject=Quote request: ${encodeURIComponent(product.sku)}`}
                 className="flex items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-6 py-3.5 font-medium text-[#374151] transition-colors hover:bg-[#f8fafc]"
@@ -241,31 +241,6 @@ export default async function ProductPage({ params }: Props) {
               </table>
             </div>
 
-            {/* Deutsch drawings */}
-            {detail && detail.drawings.length > 0 && (
-              <div className="mt-8">
-                <h2 className="mb-4 text-lg font-bold text-[#0a1628]">Drawings &amp; CAD files</h2>
-                <div className="space-y-2">
-                  {detail.drawings.map((file) => (
-                    <a
-                      key={file.url}
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center justify-between gap-4 rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 transition-all hover:border-[#2563eb]"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="rounded border border-[#e5e7eb] bg-[#f8fafc] px-2 py-0.5 text-[10px] font-bold uppercase text-[#475569]">
-                          {file.type}
-                        </span>
-                        <span className="text-sm text-[#374151]">{file.label}</span>
-                      </div>
-                      <Download size={14} className="text-[#9ca3af] group-hover:text-[#2563eb]" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Quote form (sticky) */}
@@ -275,18 +250,6 @@ export default async function ProductPage({ params }: Props) {
             </div>
           </div>
         </div>
-
-        {/* ── Deutsch compatible/related groups ─────────────────────────── */}
-        {deutschRelated.map((group) => (
-          <section key={group.title} className="mt-14">
-            <h2 className="mb-4 text-lg font-bold text-[#0a1628]">{group.title}</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-              {group.items.map((item) => (
-                <RelatedCard key={item.partNumber} sku={item.partNumber} image={item.imageUrl ?? null} />
-              ))}
-            </div>
-          </section>
-        ))}
 
         {/* ── More from brand ───────────────────────────────────────────── */}
         {related.length > 0 && (

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package } from "lucide-react";
+import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package, Tag } from "lucide-react";
 import type { Metadata } from "next";
 import { getProductDetail, type RelatedProduct, type DrawingFile } from "@/data/deutschProductDetails";
 import { deutschProducts } from "@/data/deutschConnectors";
+import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { brands } from "@/data/brands";
 import {
   findCatalogueProductByReference,
@@ -235,6 +236,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const detail = getProductDetail(slug);
   const partNumber = catalogueProduct.partNumber;
+
+  // Surfaces this exact part's own outlet listing (surplus stock, reduced
+  // price) when one exists, so a regular-catalogue visitor discovers the
+  // cheaper option, and so this page carries a real price for Merchant
+  // Center feed consistency (the feed price must match what the linked page
+  // shows — this page otherwise has no price at all, it's quote-only).
+  const outletListing = deutschOutletComponents.find(
+    (o) => o.matchedPartNumber?.toUpperCase() === partNumber.toUpperCase(),
+  );
   const seriesLabel = SERIES_LABELS[catalogueProduct.series] ?? catalogueProduct.series;
   const seriesColor = SERIES_COLORS[catalogueProduct.series] ?? "bg-slate-50 text-slate-700 border-slate-200";
 
@@ -397,13 +407,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 Request a quote
                 <ArrowRight size={15} />
               </a>
-              <a
+              <Link
                 href="/contact"
                 className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-[#f8fafc] border border-[#e5e7eb] text-[#374151] font-medium rounded-lg transition-colors"
               >
                 <Phone size={14} />
                 Call us
-              </a>
+              </Link>
               <a
                 href={`mailto:info@adcontact.se?subject=Quote request: ${partNumber}`}
                 className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-[#f8fafc] border border-[#e5e7eb] text-[#374151] font-medium rounded-lg transition-colors"
@@ -412,6 +422,31 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 Email
               </a>
             </div>
+
+            {/* Outlet stock — shown only when this exact part has its own outlet listing */}
+            {outletListing && (
+              <div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                  <Tag size={15} />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-amber-900">
+                    Outlet stock available — €{outletListing.priceEur.toFixed(2)} per unit
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-amber-800">
+                    {outletListing.quantity.toLocaleString()} in stock at our own Keila warehouse,
+                    price for 1 to 10 pieces, while quantities last.
+                  </p>
+                  <Link
+                    href="/outlet/components"
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-amber-900 underline decoration-2 underline-offset-2 hover:no-underline"
+                  >
+                    Browse the Components Outlet
+                    <ArrowRight size={12} />
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
