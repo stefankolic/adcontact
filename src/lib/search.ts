@@ -84,7 +84,15 @@ const magentoCatalogueIndex: IndexedResult[] = getAllCatalogueProducts()
       p.status === "enabled" &&
       p.routes.length > 0 &&
       p.sku &&
-      !coveredSkus.has(p.sku.toUpperCase()),
+      // The Magento `sku` is usually a numeric internal stock code (e.g.
+      // "242001-0812"), not the manufacturer part number — that lives in the
+      // "Part Number" attribute (or the name). Checking only `sku` here let
+      // 543 Deutsch parts through as duplicates of their deutschIndex entry;
+      // check the real part number too.
+      !coveredSkus.has(p.sku.toUpperCase()) &&
+      !coveredSkus.has(
+        String(p.attributes?.["Part Number"] ?? p.name ?? p.sku).toUpperCase(),
+      ),
   )
   .map((p) => {
     const brand = p.brand ?? p.manufacturer ?? p.attributes?.["Brand"] ?? "";
