@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Mail, Package } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Mail, Package, Recycle } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import { usedMachines, getModelDescription } from "@/data/usedMachines";
 import { absoluteUrl } from "@/lib/seo";
+
+// Real listing data (Komax Gamma 450) is ready, but showing it publicly is
+// gated on a supplier partner's final confirmation — flip this to true the
+// moment Stefan says go, no other changes needed. Until then this page shows
+// honest "coming soon" copy instead of the internal "Template preview" state,
+// which would look broken (not just early) to a real customer.
+const SHOW_LISTINGS = false;
 
 export const metadata: Metadata = {
   title: "Used Machines | Outlet | Adcontact",
@@ -23,11 +30,23 @@ export default function UsedMachinesPage() {
       />
 
       <main className="mx-auto max-w-[1440px] px-6 py-10">
-        {usedMachines.length > 0 && (
-          <section className="mb-10">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-[#b45309]">
-              Template preview — not yet ready for customers
+        {!SHOW_LISTINGS && (
+          <section className="mb-10 rounded-2xl border border-[#e2e8f0] bg-white px-6 py-10 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-700">
+              <Recycle size={14} />
+              Coming soon
+            </span>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-[#475569]">
+              We&apos;re building out our secondhand machine listings for the Nordic market,
+              cutting, stripping and crimping equipment sourced through our supplier network.
+              First listings are on their way. If you&apos;re looking for a specific used
+              machine, or have one to sell, tell us below and we&apos;ll help.
             </p>
+          </section>
+        )}
+
+        {SHOW_LISTINGS && usedMachines.length > 0 && (
+          <section className="mb-10">
             {/* Same template as the Ramatech product-line grid: picture LEFT
                 (w-28 / sm:w-40, fills the card height), text RIGHT. */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
