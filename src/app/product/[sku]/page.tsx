@@ -7,7 +7,9 @@ import {
   getUnifiedProduct,
   getRelatedProducts,
   productDetailHref,
+  type UnifiedProduct,
 } from "@/data/productLookup";
+import { productJsonLd, breadcrumbJsonLd } from "@/lib/productSchema";
 import QuoteForm from "@/components/QuoteForm";
 import { brands } from "@/data/brands";
 
@@ -27,18 +29,23 @@ function findBrand(name: string) {
 
 type Props = { params: Promise<{ sku: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { sku } = await params;
-  const product = getUnifiedProduct(sku);
-  if (!product) return {};
+/** One-line description, shared by the meta tag and the Product schema. */
+function productDescription(product: UnifiedProduct): string {
   const desc = Object.entries(product.specs)
     .filter(([k]) => k !== "Brand")
     .slice(0, 4)
     .map(([k, v]) => `${k}: ${v}`)
     .join(", ");
+  return `${product.sku} from ${product.brand}.${desc ? " " + desc + "." : ""} Request a quote from Adcontact, Nordic stocking distributor.`;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { sku } = await params;
+  const product = getUnifiedProduct(sku);
+  if (!product) return {};
   return {
     title: `${product.sku} | ${product.brand} | Adcontact`,
-    description: `${product.sku} — ${product.brand}.${desc ? " " + desc + "." : ""} Request a quote from Adcontact, Nordic stocking distributor.`,
+    description: productDescription(product),
     alternates: { canonical: `https://www.adcontact.se${productDetailHref(product.sku)}` },
   };
 }
@@ -109,8 +116,33 @@ export default async function ProductPage({ params }: Props) {
 
   const related = getRelatedProducts(product, 6);
 
+  const productLd = productJsonLd({
+    name: `${product.brand} ${product.sku}`,
+    partNumber: product.sku,
+    brand: product.brand,
+    description: productDescription(product),
+    image,
+    url: productDetailHref(product.sku),
+    // Quote-only on this template — outlet items are all Deutsch, which
+    // redirects to the rich page above, so no priced offer here.
+  });
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Webshop", url: "/webshop.html" },
+    { name: product.brand, url: product.brandHref },
+    { name: product.sku, url: productDetailHref(product.sku) },
+  ]);
+
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* Breadcrumb */}
       <div className="border-b border-[#e5e7eb] bg-white">
         <div className="mx-auto max-w-[1440px] px-6 py-3">

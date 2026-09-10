@@ -20,6 +20,38 @@ export const viewport: Viewport = {
   userScalable: true,
 };
 
+// Site-wide Organization schema — ties the website to the same entity as the
+// Google Business Profile (matching name, logo, address, contact), which is
+// what lets Google connect the two. Adcontact is the operating brand; Gammeter
+// OÜ is the parent (never present Adcontact as a standalone company).
+const organizationLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Adcontact",
+  legalName: "Adcontact AB",
+  url: SITE_URL,
+  logo: `${SITE_URL}/images/logotopmenu.png`,
+  description:
+    "Nordic specialist distributor of industrial electromechanical components, connectors, heat shrink tubing, crimp contacts and wire-processing production equipment.",
+  parentOrganization: { "@type": "Organization", name: "Gammeter OÜ" },
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Ekbacksvägen 22",
+    postalCode: "168 69",
+    addressLocality: "Bromma",
+    addressCountry: "SE",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "sales",
+    telephone: "+46 8 445 36 00",
+    email: "info@adcontact.se",
+    areaServed: ["SE", "FI", "NO", "DK", "EE"],
+    availableLanguage: ["English", "Swedish"],
+  },
+  sameAs: ["https://www.linkedin.com/company/adcontact-gammeter/"],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -68,6 +100,10 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased"
         style={{ fontFamily: "Inter, system-ui, -apple-system, sans-serif" }}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+        />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

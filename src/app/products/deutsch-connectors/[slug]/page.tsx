@@ -14,6 +14,7 @@ import {
   type CatalogueProduct,
   type CatalogueFile,
 } from "@/lib/magentoCatalogue";
+import { productJsonLd, breadcrumbJsonLd } from "@/lib/productSchema";
 import QuoteForm from "@/components/QuoteForm";
 
 export function generateStaticParams() {
@@ -34,6 +35,20 @@ const SERIES_LABELS: Record<string, string> = {
   AT: "AT Series",
 };
 
+type DeutschCatalogueProduct = (typeof deutschProducts)[number];
+
+/** One source of truth for the part's one-line description — used for both the
+ *  meta description and the Product schema so the two never drift apart. */
+function productDescription(
+  cp: DeutschCatalogueProduct,
+  detail: ReturnType<typeof getProductDetail>,
+): string {
+  if (detail) {
+    return `${cp.partNumber}: ${detail.specs["Series"] ?? "Deutsch"} sealed connector, ${detail.specs["No. of cavities"] ?? ""} way, contact size ${detail.specs["Contact Size"] ?? ""}. Request a quote from Adcontact Sweden.`;
+  }
+  return `${cp.partNumber}: ${SERIES_LABELS[cp.series] ?? cp.series} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const catalogueProduct = deutschProducts.find((p) => p.partNumber.toLowerCase() === slug);
@@ -41,9 +56,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const detail = getProductDetail(slug);
   return {
     title: `${catalogueProduct.partNumber} | Deutsch Connector | Adcontact`,
-    description: detail
-      ? `${catalogueProduct.partNumber}: ${detail.specs["Series"] ?? "Deutsch"} sealed connector, ${detail.specs["No. of cavities"] ?? ""} way, contact size ${detail.specs["Contact Size"] ?? ""}. Request a quote from Adcontact Sweden.`
-      : `${catalogueProduct.partNumber}: ${SERIES_LABELS[catalogueProduct.series] ?? catalogueProduct.series} sealed connector${catalogueProduct.ways ? `, ${catalogueProduct.ways}-way` : ""}. Request a quote from Adcontact Sweden.`,
+    description: productDescription(catalogueProduct, detail),
     alternates: { canonical: `/products/deutsch-connectors/${slug}` },
   };
 }
@@ -301,8 +314,34 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const hasDetailRequired = detail && detail.requiredComponents.length > 0;
   const hasDetailAccessories = detail && detail.accessories.length > 0;
 
+  const pagePath = `/products/deutsch-connectors/${slug}`;
+  const productLd = productJsonLd({
+    name: `Deutsch ${partNumber}${seriesLabel ? `, ${seriesLabel}` : ""}`,
+    partNumber,
+    brand: "Deutsch",
+    description: productDescription(catalogueProduct, detail),
+    image: mainImage,
+    url: pagePath,
+    // Only the parts with real outlet stock carry a visible price on the page.
+    offer: outletListing ? { priceEur: outletListing.priceEur } : undefined,
+  });
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Webshop", url: "/webshop.html" },
+    { name: "Deutsch Connectors", url: "/webshop/components/sealed-connectors/deutsch/connectors.html" },
+    { name: partNumber, url: pagePath },
+  ]);
+
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-[#e5e7eb]">
         <div className="max-w-[1440px] mx-auto px-6 py-3">
