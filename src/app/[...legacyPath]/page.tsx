@@ -26,7 +26,9 @@ type Props = {
 export async function generateStaticParams() {
   return [];
 }
-export const revalidate = 86400;
+// 7 days, not 1 — see webshop/[...path]/page.tsx (2026-08-29 ISR Writes cost
+// reduction, same reasoning applies here).
+export const revalidate = 604800;
 
 function pathFromSegments(segments: string[]) {
   return normalizeCataloguePath(`/${segments.join("/")}`);

@@ -3,7 +3,11 @@
 import { useEffect, useRef } from "react";
 import { HCAPTCHA_SITEKEY } from "@/lib/web3forms";
 
-const SCRIPT_SRC = "https://js.hcaptcha.com/1/api.js?render=explicit";
+// hl=en forces English regardless of the visitor's browser locale — without
+// it hCaptcha auto-detects language (e.g. shows "Jag är människa" for a
+// Swedish-locale browser), inconsistent with the rest of the site, which is
+// English-only.
+const SCRIPT_SRC = "https://js.hcaptcha.com/1/api.js?render=explicit&hl=en";
 
 type HCaptchaApi = {
   render: (el: HTMLElement, opts: Record<string, unknown>) => string;
@@ -41,7 +45,9 @@ export default function HCaptcha({ onToken }: { onToken: (token: string) => void
   const containerRef = useRef<HTMLDivElement>(null);
   const idRef = useRef<string | null>(null);
   const onTokenRef = useRef(onToken);
-  onTokenRef.current = onToken;
+  useEffect(() => {
+    onTokenRef.current = onToken;
+  }, [onToken]);
 
   useEffect(() => {
     let removed = false;
@@ -50,6 +56,7 @@ export default function HCaptcha({ onToken }: { onToken: (token: string) => void
         if (removed || !containerRef.current || !window.hcaptcha || idRef.current) return;
         idRef.current = window.hcaptcha.render(containerRef.current, {
           sitekey: HCAPTCHA_SITEKEY,
+          hl: "en",
           callback: (token: string) => onTokenRef.current(token),
           "expired-callback": () => onTokenRef.current(""),
           "error-callback": () => onTokenRef.current(""),

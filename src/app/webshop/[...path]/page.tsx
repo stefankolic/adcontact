@@ -46,7 +46,13 @@ type Props = {
 export async function generateStaticParams() {
   return [];
 }
-export const revalidate = 86400;
+// 7 days, not 1 (2026-08-29) — this data only ever changes on redeploy, so a
+// daily window bought no real freshness, just a forced re-render + ISR write
+// for every actively-visited page once every 24h. ISR Writes showed up as a
+// real, significant cost line on the Vercel usage breakdown; lengthening this
+// cuts that down directly. See [[post-launch-backlog]] for the full reasoning
+// — worth pushing even longer later once behaviour across a deploy is confirmed.
+export const revalidate = 604800;
 
 function canonical(path: string) {
   return absoluteUrl(path);
