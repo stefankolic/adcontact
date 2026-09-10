@@ -7,7 +7,11 @@ import { deutschOutletComponents } from "@/data/deutschOutlet";
 import OutletComponentsClient from "./OutletComponentsClient";
 
 export const metadata: Metadata = {
-  title: "Components Outlet | Adcontact",
+  // Deutsch-only for now, so the <title> can be brand-specific and target real
+  // search intent ("deutsch connector outlet / surplus / clearance"). The
+  // visible H1 stays the brand-agnostic "Components outlet" — this becomes a
+  // multi-brand section as more surplus stock is added.
+  title: "Deutsch Connector Outlet, Surplus Stock at Reduced Prices | Adcontact",
   description:
     "Surplus Deutsch connector stock from Adcontact's own warehouse, at outlet pricing while quantities last.",
   alternates: { canonical: absoluteUrl("/outlet/components") },
