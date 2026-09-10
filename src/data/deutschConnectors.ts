@@ -15,7 +15,11 @@ export interface DeutschProduct {
 // doesn't silently drop the fix — see PRODUCT_OVERRIDES in magentoCatalogue.ts
 // for the equivalent mechanism on the main catalogue.
 const DEUTSCH_IMAGE_OVERRIDES: Record<string, string> = {
-  "HDP24-24-18SE-L017": "/media/featured-products/hdp24-24-18se-l017.webp",
+  // 2026-09-10: was an 80x59 webp — swapped for a 550x550 photo Stefan
+  // sourced (447px product content, white-padded to clear Google Merchant
+  // Center's 500x500 minimum). The homepage featured-products strip still
+  // uses the old small webp; that's a separate, lower-stakes context.
+  "HDP24-24-18SE-L017": "/media/outlet-components/hdp24-24-18se-l017.jpg",
 };
 
 export const deutschProducts = (
