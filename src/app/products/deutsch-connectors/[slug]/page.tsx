@@ -380,6 +380,29 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
             </div>
+
+            {/* Outlet stock — under the image, matched to its width. Only shown
+                when this exact part has its own outlet listing. */}
+            {outletListing && (
+              <div className="mt-4 max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Tag size={14} className="flex-none text-amber-700" />
+                  <p className="text-sm font-bold text-amber-900">
+                    Outlet stock, €{outletListing.priceEur.toFixed(2)} per unit
+                  </p>
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-amber-800">
+                  {outletListing.quantity.toLocaleString()} in stock at our Keila warehouse, price
+                  for 1 to 10 pieces, while quantities last.{" "}
+                  <Link
+                    href="/outlet/components"
+                    className="font-semibold text-amber-900 underline decoration-2 underline-offset-2 hover:no-underline"
+                  >
+                    Browse the Components Outlet
+                  </Link>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Key info */}
@@ -461,31 +484,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 Email
               </a>
             </div>
-
-            {/* Outlet stock — shown only when this exact part has its own outlet listing */}
-            {outletListing && (
-              <div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-                  <Tag size={15} />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-amber-900">
-                    Outlet stock available — €{outletListing.priceEur.toFixed(2)} per unit
-                  </p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-amber-800">
-                    {outletListing.quantity.toLocaleString()} in stock at our own Keila warehouse,
-                    price for 1 to 10 pieces, while quantities last.
-                  </p>
-                  <Link
-                    href="/outlet/components"
-                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-amber-900 underline decoration-2 underline-offset-2 hover:no-underline"
-                  >
-                    Browse the Components Outlet
-                    <ArrowRight size={12} />
-                  </Link>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
