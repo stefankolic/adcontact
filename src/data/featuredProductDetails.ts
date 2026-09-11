@@ -29,9 +29,16 @@ const crawledDetails =
 
 const modernSlugs = ["dt06-4s-e008", "dt06-2s-e003", "0460-202-1631"];
 
+// Matches by the trailing "/<slug>.html" segment rather than assuming every
+// card's href is prefixed "/webshop/" — some (e.g. HDP24-24-18SE-L017,
+// "/hdp24-24-18se-l017.html") aren't. The exact-prefix version silently never
+// matched for those, so the live-data override below never fired and this
+// page kept serving whatever was in the crawled JSON forever, including a
+// stale price and, for HDP24-24-18SE-L017, the generic no_photo placeholder
+// image (found 2026-09-11 while syncing the same part's homepage entry).
 function featuredCard(slug: string) {
-  return featuredProducts.find(
-    (product) => product.href === `/webshop/${slug}.html`,
+  return featuredProducts.find((product) =>
+    product.href.toLowerCase().endsWith(`/${slug.toLowerCase()}.html`),
   );
 }
 
@@ -99,6 +106,13 @@ export const featuredProductDetails = [
   ...crawledDetails.map((product) => ({
     ...product,
     price: featuredCard(product.slug)?.price ?? product.price,
+    // The crawled image is a point-in-time snapshot that can never self-heal
+    // (e.g. HDP24-24-18SE-L017's was still the generic no_photo placeholder);
+    // prefer whatever the featuredProducts card has now, same as price above.
+    imageUrl: featuredCard(product.slug)?.image ?? product.imageUrl,
+    gallery: featuredCard(product.slug)?.image
+      ? [featuredCard(product.slug)!.image]
+      : product.gallery,
   })),
   ...modernSlugs
     .map(getModernDetail)
