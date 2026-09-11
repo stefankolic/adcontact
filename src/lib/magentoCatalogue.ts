@@ -694,13 +694,19 @@ export function getAllCatalogueProducts(): CatalogueProduct[] {
 // nested categories (found 2026-09-11 for HTP: categories 1038, 1588 and 1589
 // are ALL named "Fuse Holder", nested three deep inside each other) — it's a
 // data-corruption artifact, never a genuinely more specific/correct URL.
+//
+// Segments are compared after stripping a trailing "s" so a singular/plural
+// pair (e.g. "fuse-holder" then "fuse-holders") counts as a repeat too, not
+// just an exact match — HTP's category chain uses both forms across its
+// nesting levels.
 function hasDuplicateSegment(route: string): boolean {
   const segments = route.split("/").filter(Boolean);
   segments.pop(); // the product slug itself is never the problem
   const seen = new Set<string>();
   for (const segment of segments) {
-    if (seen.has(segment)) return true;
-    seen.add(segment);
+    const normalized = segment.endsWith("s") ? segment.slice(0, -1) : segment;
+    if (seen.has(normalized)) return true;
+    seen.add(normalized);
   }
   return false;
 }
