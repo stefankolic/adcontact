@@ -113,9 +113,29 @@ const magentoCatalogueIndex: IndexedResult[] = getAllCatalogueProducts()
     ];
 
     // All attribute values (covers Series, LADD Accessory Type, Material, etc.)
-    const attrValues = Object.values(p.attributes ?? {}).filter(
-      (v): v is string => typeof v === "string" && v.toLowerCase() !== "y" && v.toLowerCase() !== "n",
-    );
+    // except the technical cross-reference codes below (crimp tool numbers,
+    // DIN standard cross-references, application-image codes) — their values
+    // are internal codes, not descriptive text, and coincidentally collide
+    // with other real products' own SKUs often enough to surface as
+    // confusing, unrelated "hits". Found 2026-09-11: searching Vogt's SKU
+    // 491116 also matched product 461116, purely because 461116's "Nummer
+    // DIN" attribute happens to hold the string "491116" as a standard
+    // cross-reference. Audited the full catalogue: 67 products collide via
+    // "Nummer DIN" alone, 1,364 via "Werkzuege" (crimp tool codes).
+    const NON_SEARCHABLE_ATTRIBUTES = new Set([
+      "Werkzuege",
+      "Nummer DIN",
+      "Nummer F",
+      "Farbe DIN",
+      "Farbe F",
+      "Anwendungsbild",
+    ]);
+    const attrValues = Object.entries(p.attributes ?? {})
+      .filter(([key]) => !NON_SEARCHABLE_ATTRIBUTES.has(key))
+      .map(([, v]) => v)
+      .filter(
+        (v): v is string => typeof v === "string" && v.toLowerCase() !== "y" && v.toLowerCase() !== "n",
+      );
 
     return {
       id: `magento-${p.id}`,

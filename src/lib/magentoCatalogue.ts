@@ -688,6 +688,23 @@ export function getAllCatalogueProducts(): CatalogueProduct[] {
   );
 }
 
+// A route has a duplicate segment when the same category slug repeats in its
+// path (e.g. ".../fuse-holder/fuse-holders/fuse-holder/..."). That shape only
+// exists because the underlying Magento category tree has literally-duplicate
+// nested categories (found 2026-09-11 for HTP: categories 1038, 1588 and 1589
+// are ALL named "Fuse Holder", nested three deep inside each other) — it's a
+// data-corruption artifact, never a genuinely more specific/correct URL.
+function hasDuplicateSegment(route: string): boolean {
+  const segments = route.split("/").filter(Boolean);
+  segments.pop(); // the product slug itself is never the problem
+  const seen = new Set<string>();
+  for (const segment of segments) {
+    if (seen.has(segment)) return true;
+    seen.add(segment);
+  }
+  return false;
+}
+
 export function catalogueProductLegacyRoute(product: CatalogueProduct): string {
   const webshopRoutes = product.routes.filter((route) => route.startsWith("/webshop/"));
   if (webshopRoutes.length > 0) {
@@ -699,9 +716,16 @@ export function catalogueProductLegacyRoute(product: CatalogueProduct): string {
     // segment alias for no real reason. Found 2026-09-11 comparing
     // 0460-202-1631 (nested route listed first) against 1062-12-0144 (same
     // shape of routes, but the flat one happened to be listed first).
-    return webshopRoutes.reduce((longest, route) =>
-      route.length > longest.length ? route : longest,
-    );
+    //
+    // Filter out duplicate-segment routes first (see hasDuplicateSegment) so
+    // "prefer longest" can't pick a degenerate, corrupted-category route just
+    // because it's the longest string — found 2026-09-11 for HTP's
+    // FHN0-C0A5-C0A5, which was landing on ".../fuse-holder/fuse-holders/
+    // fuse-holder/..." instead of a real category path. Falls back to the
+    // full pool if every route happens to be degenerate.
+    const clean = webshopRoutes.filter((route) => !hasDuplicateSegment(route));
+    const pool = clean.length > 0 ? clean : webshopRoutes;
+    return pool.reduce((longest, route) => (route.length > longest.length ? route : longest));
   }
   return product.route ?? product.routes[0] ?? "#";
 }
