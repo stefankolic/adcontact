@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import CatalogueCategoryPage from "@/components/catalogue/CatalogueCategoryPage";
 import CatalogueProductPage from "@/components/catalogue/CatalogueProductPage";
 import {
@@ -8,6 +8,7 @@ import {
   normalizeCataloguePath,
   resolveCatalogueRoute,
 } from "@/lib/magentoCatalogue";
+import { deutschProducts } from "@/data/deutschConnectors";
 import {
   absoluteUrl,
   categoryMetaDescription,
@@ -89,6 +90,22 @@ export default async function LegacyCatalogueRoute({ params }: Props) {
   if (route.type === "product") {
     const product = getCatalogueProduct(route.id);
     if (!product) notFound();
+
+    // Deutsch connector products have a richer dedicated page — redirect
+    // there, same as webshop/[...path]/page.tsx and product/[sku]/page.tsx
+    // already do. This route (bare legacy slugs like /hdp24-24-18se-l017.html)
+    // was missing the same treatment, so those URLs rendered the thinner
+    // generic catalogue page directly instead of redirecting to the rich one
+    // — found 2026-09-11 via the homepage featured-products link.
+    const sku = (product.sku ?? "").toUpperCase();
+    const name = (product.name ?? "").toUpperCase();
+    const deutschMatch = deutschProducts.find(
+      (d) => d.partNumber.toUpperCase() === sku || d.partNumber.toUpperCase() === name,
+    );
+    if (deutschMatch) {
+      permanentRedirect(`/products/deutsch-connectors/${deutschMatch.partNumber.toLowerCase()}`);
+    }
+
     return <CatalogueProductPage product={product} />;
   }
 
