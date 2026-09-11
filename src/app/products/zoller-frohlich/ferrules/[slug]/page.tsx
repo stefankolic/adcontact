@@ -266,7 +266,7 @@ export async function generateMetadata({
   const page = FERRULE_PAGES[slug];
   if (!page) return {};
   return {
-    title: `${page.title} | Zoller & Fröhlich | Adcontact`,
+    title: `${page.title} | Zoller & Fröhlich`,
     description: page.intro,
     alternates: { canonical: `/products/zoller-frohlich/ferrules/${slug}` },
   };

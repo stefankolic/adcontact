@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = getUnifiedProduct(sku);
   if (!product) return {};
   return {
-    title: `${product.sku} | ${product.brand} | Adcontact`,
+    title: `${product.sku} | ${product.brand}`,
     description: productDescription(product),
     alternates: { canonical: `https://www.adcontact.se${productDetailHref(product.sku)}` },
   };

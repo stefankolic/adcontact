@@ -5,7 +5,7 @@ import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import CookieSettingsLink from "@/components/CookieSettingsLink";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Adcontact",
+  title: "Privacy Policy",
 };
 
 export default function PrivacyPolicyPage() {

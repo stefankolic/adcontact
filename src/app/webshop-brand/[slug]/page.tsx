@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!brand) return {};
 
   return {
-    title: `${brand.name} Webshop | Adcontact`,
+    title: `${brand.name} Webshop`,
     description: brand.description,
     alternates: {
       canonical: `https://www.adcontact.se/webshop/components/sealed-connectors/${brand.slug}.html`,

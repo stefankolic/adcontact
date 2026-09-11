@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Policies | Adcontact",
+  title: "Policies",
 };
 
 const policies = [

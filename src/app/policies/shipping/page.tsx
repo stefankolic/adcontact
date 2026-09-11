@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Shipping Policy | Adcontact",
+  title: "Shipping Policy",
 };
 
 export default function ShippingPolicyPage() {
@@ -17,7 +17,7 @@ export default function ShippingPolicyPage() {
         <p>Our standard forwarder is FedEx.</p>
         <p>Goods can be picked up at our distribution center in Keila, Estonia.</p>
         <p>
-          For further questions feel free to contact us by using the form under "Contact us".
+          For further questions feel free to contact us by using the form under &quot;Contact us&quot;.
         </p>
         <p className="font-medium">Thank you!</p>
       </div>

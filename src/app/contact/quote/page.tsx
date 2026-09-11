@@ -4,7 +4,7 @@ import RFQForm from "@/components/ui/RFQForm";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Request a Quote | Adcontact",
+  title: "Request a Quote",
   description:
     "Request a quote for industrial components or wire-processing equipment. Standard RFQs answered within 1 business day.",
 };

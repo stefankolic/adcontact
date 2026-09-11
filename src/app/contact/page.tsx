@@ -4,7 +4,7 @@ import { Phone, Mail, MapPin, ArrowRight, Clock } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Contact | Adcontact",
+  title: "Contact",
   description:
     "Contact Adcontact. Headquarters in Keila, Estonia (Gammeter OÜ) and sales office in Bromma, Sweden (Adcontact AB). Covering the full Nordic region.",
 };

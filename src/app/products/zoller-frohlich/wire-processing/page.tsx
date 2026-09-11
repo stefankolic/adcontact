@@ -11,7 +11,7 @@ const ZOFRE = "https://www.zofre.de/en/wire-processing";
 const HEADER_IMAGE = "/media/zoller-frohlich/ferrules-application.jpg";
 
 export const metadata: Metadata = {
-  title: "Zoller & Fröhlich wire processing | Adcontact",
+  title: "Zoller & Fröhlich wire processing",
   description:
     "With Z+F's wide product range there is a right solution for every connection problem: ferrules, tools and machines for many different applications.",
   alternates: { canonical: "/products/zoller-frohlich/wire-processing" },

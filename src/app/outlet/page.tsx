@@ -5,7 +5,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Outlet | Adcontact",
+  title: "Outlet",
   description:
     "Secondhand cable-processing machines and surplus component stock from Adcontact, at outlet pricing while it lasts.",
   alternates: { canonical: absoluteUrl("/outlet") },

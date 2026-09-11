@@ -5,7 +5,7 @@ import TrustSection from "@/components/home/TrustSection";
 import PageHeader from "@/components/layout/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Quality Management | ISO 9001:2015 | Adcontact",
+  title: "Quality Management | ISO 9001:2015",
   description:
     "Adcontact is ISO 9001:2015 certified. Learn about our quality management system, continuous improvement processes, and commitment to delivering reliable industrial components.",
 };

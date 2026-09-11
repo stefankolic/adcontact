@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Return & Refund Policy | Adcontact",
+  title: "Return & Refund Policy",
 };
 
 export default function ReturnsPolicyPage() {
@@ -23,7 +23,7 @@ export default function ReturnsPolicyPage() {
           Returns are only accepted after written approval from our quality team. Products must be returned in their original condition and packaging unless otherwise agreed.
         </p>
         <p>
-          For further questions feel free to contact us by using the form under "Contact us".
+          For further questions feel free to contact us by using the form under &quot;Contact us&quot;.
         </p>
         <p className="font-medium">Thank you!</p>
       </div>

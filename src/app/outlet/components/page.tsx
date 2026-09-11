@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   // search intent ("deutsch connector outlet / surplus / clearance"). The
   // visible H1 stays the brand-agnostic "Components outlet" — this becomes a
   // multi-brand section as more surplus stock is added.
-  title: "Deutsch Connector Outlet, Surplus Stock at Reduced Prices | Adcontact",
+  title: "Deutsch Connector Outlet, Surplus Stock at Reduced Prices",
   description:
     "Surplus Deutsch connector stock from Adcontact's own warehouse, at outlet pricing while quantities last.",
   alternates: { canonical: absoluteUrl("/outlet/components") },

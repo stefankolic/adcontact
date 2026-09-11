@@ -14,7 +14,7 @@ import { absoluteUrl } from "@/lib/seo";
 const SHOW_LISTINGS = false;
 
 export const metadata: Metadata = {
-  title: "Used Machines | Outlet | Adcontact",
+  title: "Used Machines | Outlet",
   description:
     "Second-hand cable-processing machines from Adcontact. We are building our used-machine offering for the Nordic market. Tell us what you are looking for and we will help you source it.",
   alternates: { canonical: absoluteUrl("/outlet/used-machines") },

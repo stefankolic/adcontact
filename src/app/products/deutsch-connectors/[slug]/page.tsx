@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!catalogueProduct) return {};
   const detail = getProductDetail(slug);
   return {
-    title: `${catalogueProduct.partNumber} | Deutsch Connector | Adcontact`,
+    title: `${catalogueProduct.partNumber} | Deutsch Connector`,
     description: productDescription(catalogueProduct, detail),
     alternates: { canonical: `/products/deutsch-connectors/${slug}` },
   };

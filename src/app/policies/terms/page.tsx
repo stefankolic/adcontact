@@ -4,7 +4,7 @@ import { ArrowRight, Download } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "General Terms of Delivery | Adcontact",
+  title: "General Terms of Delivery",
 };
 
 export default function TermsPage() {
