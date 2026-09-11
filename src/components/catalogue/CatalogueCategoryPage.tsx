@@ -13,6 +13,7 @@ import {
   getCatalogueCategory,
   getCatalogueProduct,
   resolveCatalogueRoute,
+  findCatalogueProductByReference,
   RAMATECH_CATEGORY_ID,
   type CatalogueCategory,
 } from "@/lib/magentoCatalogue";
@@ -1221,10 +1222,22 @@ export default function CatalogueCategoryPage({
   // The webshop root's "Featured product selection" shows the SAME curated
   // set as the homepage marquee (src/data/featuredProducts.ts), not the raw
   // Magento category-3 product list — those two used to be independent,
-  // silently-diverging lists (Stefan flagged the mismatched counts, 2026-08-13).
+  // silently-diverging lists (Stefan flagged the mismatched counts, 2026-08-13,
+  // see [[webshop-catalogue-patterns]]).
+  //
+  // Resolve by `fp.name` (findCatalogueProductByReference), not `fp.href` via
+  // resolveCatalogueRoute — the latter only understands legacy Magento routes,
+  // so it silently drops any entry whose href points at the newer
+  // /products/deutsch-connectors/[slug] page instead (fell into exactly that
+  // trap 2026-09-11: repointing curated Deutsch entries at their rich page
+  // quietly dropped 4 of 16 from this grid, 16→12, with no error anywhere).
+  // Resolving by name instead decouples "which page do we link to" from
+  // "which catalogue product is this" so the two can vary independently.
   const webshopRootFeaturedPool: CatalogueProduct[] = isWebshopRoot
     ? featuredProducts
         .map((fp) => {
+          const byName = findCatalogueProductByReference(fp.name);
+          if (byName) return byName;
           const route = resolveCatalogueRoute(fp.href);
           if (!route || route.type !== "product") return null;
           return getCatalogueProduct(route.id) ?? null;

@@ -689,7 +689,21 @@ export function getAllCatalogueProducts(): CatalogueProduct[] {
 }
 
 export function catalogueProductLegacyRoute(product: CatalogueProduct): string {
-  return product.routes.find((route) => route.startsWith("/webshop/")) ?? product.route ?? product.routes[0] ?? "#";
+  const webshopRoutes = product.routes.filter((route) => route.startsWith("/webshop/"));
+  if (webshopRoutes.length > 0) {
+    // Prefer the most descriptive (deepest-nested) alias, not just whichever
+    // happens to come first in the array — that order isn't meaningful (it's
+    // whatever the original Magento export happened to discover first), so
+    // two products with an identical route shape could get inconsistent
+    // links: one showing its full category path, the other a flat one-
+    // segment alias for no real reason. Found 2026-09-11 comparing
+    // 0460-202-1631 (nested route listed first) against 1062-12-0144 (same
+    // shape of routes, but the flat one happened to be listed first).
+    return webshopRoutes.reduce((longest, route) =>
+      route.length > longest.length ? route : longest,
+    );
+  }
+  return product.route ?? product.routes[0] ?? "#";
 }
 
 function normalizeReference(value: string) {
