@@ -1,9 +1,26 @@
+import { deutschOutletComponents } from "@/data/deutschOutlet";
+import { getUnifiedProduct } from "@/data/productLookup";
+
 export type FeaturedProduct = {
   name: string;
   href: string;
   image: string;
   price: string;
 };
+
+// HDP24-24-18SE-L017 is also outlet stock, so its image and price are derived
+// live from the outlet data instead of hardcoded below. A hardcoded snapshot
+// drifted twice: the price still read the pre-re-import figure (7.87 EUR vs
+// the current 9.48 EUR) and the image separately needed a manual fix the same
+// day its R2 override was updated. Deriving both here means a future outlet
+// re-import or image change stays in sync on this strip automatically, no
+// second "don't forget the featured strip too" step required. Falls back to
+// the last-known values if the outlet listing or image ever disappears.
+const HDP_PART_NUMBER = "HDP24-24-18SE-L017";
+const hdpOutletListing = deutschOutletComponents.find(
+  (o) => o.matchedPartNumber?.toUpperCase() === HDP_PART_NUMBER,
+);
+const hdpImage = getUnifiedProduct(HDP_PART_NUMBER)?.image;
 
 export const featuredProducts: FeaturedProduct[] = [
   {
@@ -37,10 +54,10 @@ export const featuredProducts: FeaturedProduct[] = [
     price: "Quote",
   },
   {
-    name: "HDP24-24-18SE-L017",
+    name: HDP_PART_NUMBER,
     href: "/hdp24-24-18se-l017.html",
-    image: "/media/featured-products/hdp24-24-18se-l017.webp",
-    price: "7.87 EUR",
+    image: hdpImage ?? "/media/featured-products/hdp24-24-18se-l017.webp",
+    price: hdpOutletListing ? `${hdpOutletListing.priceEur.toFixed(2)} EUR` : "Quote",
   },
   {
     name: "DT06-4S-E008",
