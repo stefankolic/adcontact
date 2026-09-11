@@ -263,13 +263,55 @@ function magentoImageSrc(path: string | null | undefined): string | null {
   return path;
 }
 
+// Duplicated from src/lib/magentoCatalogue.ts (hasDuplicateSegment /
+// preferCleanestRoute) instead of imported: that module does a top-level
+// `import productsJson from ".../products.json"` (22,308 products), so any
+// value import from it — even one small pure function — would pull the
+// entire catalogue JSON into this "use client" component's bundle. Keep
+// these two in sync if the selection rule ever changes.
+function hasDuplicateSegment(route: string): boolean {
+  const segments = route.split("/").filter(Boolean);
+  segments.pop();
+  const seen = new Set<string>();
+  for (const segment of segments) {
+    const normalized = segment.endsWith("s") ? segment.slice(0, -1) : segment;
+    if (seen.has(normalized)) return true;
+    seen.add(normalized);
+  }
+  return false;
+}
+
+function preferCleanestRoute(routes: string[]): string {
+  const clean = routes.filter((route) => !hasDuplicateSegment(route));
+  const pool = clean.length > 0 ? clean : routes;
+  return pool.reduce((longest, route) => (route.length > longest.length ? route : longest));
+}
+
+// Found 2026-09-11: this used to pick the FIRST route matching the current
+// category's base path (`.find()`, arbitrary array order) while the rest of
+// the site's link convention (catalogueProductLegacyRoute) preferred the
+// LONGEST clean one — two independent "which of a product's several valid
+// URLs do we show" implementations that could each land on a different
+// answer for the same product. Stefan caught it comparing HTP's
+// FHN0-C0A5-C0A5 link from the homepage featured strip against its link from
+// clicking through webshop.html's own grid. Now applies the same
+// preferCleanestRoute selection here, scoped to whichever routes match the
+// current category context (falls back to the full webshop-route pool via
+// catalogueProductLegacyRoute's own rule when there's no category context or
+// no match) so both surfaces agree.
 function productHref(product: CatalogueProduct, categoryRoute: string | null) {
   if (categoryRoute) {
     const basePath = categoryRoute.replace(/\.html$/, "/");
-    const categoryProductRoute = product.routes.find((route) => route.startsWith(basePath));
-    if (categoryProductRoute) return categoryProductRoute;
+    const categoryProductRoutes = product.routes.filter((route) => route.startsWith(basePath));
+    if (categoryProductRoutes.length > 0) {
+      return preferCleanestRoute(categoryProductRoutes);
+    }
   }
 
+  const webshopRoutes = product.routes.filter((route) => route.startsWith("/webshop/"));
+  if (webshopRoutes.length > 0) {
+    return preferCleanestRoute(webshopRoutes);
+  }
   return product.route ?? product.routes[0] ?? "#";
 }
 

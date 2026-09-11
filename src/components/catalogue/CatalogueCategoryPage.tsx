@@ -47,8 +47,19 @@ import type { CatalogueProduct } from "@/lib/magentoCatalogue";
 function buildDeutschImageMap(products: CatalogueProduct[]): Record<string, string> {
   const map: Record<string, string> = {};
   for (const product of products) {
-    const sku = (product.sku ?? product.name ?? "").toUpperCase();
-    const deutsch = deutschProducts.find((d) => d.partNumber.toUpperCase() === sku);
+    // The Magento `sku` is usually a numeric internal stock code (e.g.
+    // "244024-0118"), not the manufacturer part number ("HDP24-24-18SE-
+    // L017") that deutschProducts is keyed by — the real part number lives
+    // in the "Part Number" attribute, or falls back to `name`. Checking only
+    // `sku ?? name` here silently failed to match whenever `sku` was present
+    // but wasn't the part number, which is most Deutsch products (543 of
+    // them, confirmed 2026-09-11 — the identical mismatch already fixed once
+    // in search.ts's magentoCatalogueIndex for the same reason, e.g.
+    // HDP24-24-18SE-L017 missing its photo on webshop.html's featured grid).
+    const reference = String(
+      product.attributes?.["Part Number"] ?? product.name ?? product.sku ?? "",
+    ).toUpperCase();
+    const deutsch = deutschProducts.find((d) => d.partNumber.toUpperCase() === reference);
     // Skip Magento no_photo/placeholder images so the card falls through to the
     // clean "No image available" placeholder instead of "image coming soon".
     if (deutsch?.imageUrl && !/no_photo|placeholder/i.test(deutsch.imageUrl)) {

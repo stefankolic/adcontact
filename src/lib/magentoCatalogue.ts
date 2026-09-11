@@ -711,27 +711,39 @@ function hasDuplicateSegment(route: string): boolean {
   return false;
 }
 
+// Picks the single best route out of a set of candidates that all point at
+// the same product: prefer the most descriptive (deepest-nested) alias, not
+// just whichever happens to come first in the array — that order isn't
+// meaningful (it's whatever the original Magento export happened to discover
+// first), so two products with an identical route shape could get
+// inconsistent links: one showing its full category path, the other a flat
+// one-segment alias for no real reason. Found 2026-09-11 comparing
+// 0460-202-1631 (nested route listed first) against 1062-12-0144 (same shape
+// of routes, but the flat one happened to be listed first).
+//
+// Filters out duplicate-segment routes first (see hasDuplicateSegment) so
+// "prefer longest" can't pick a degenerate, corrupted-category route just
+// because it's the longest string — found 2026-09-11 for HTP's
+// FHN0-C0A5-C0A5, which was landing on ".../fuse-holder/fuse-holders/
+// fuse-holder/..." instead of a real category path. Falls back to the full
+// pool if every route happens to be degenerate.
+//
+// Shared by catalogueProductLegacyRoute (below) and CatalogueProductBrowser's
+// own productHref() — those used to be two separate implementations with two
+// separate "first in array order wins" bugs; fixing only one left the other
+// still inconsistent (found 2026-09-11, Stefan comparing the featured-
+// products link against the webshop.html browse-grid link for the same
+// HTP product and getting two different, both-valid URLs).
+export function preferCleanestRoute(routes: string[]): string {
+  const clean = routes.filter((route) => !hasDuplicateSegment(route));
+  const pool = clean.length > 0 ? clean : routes;
+  return pool.reduce((longest, route) => (route.length > longest.length ? route : longest));
+}
+
 export function catalogueProductLegacyRoute(product: CatalogueProduct): string {
   const webshopRoutes = product.routes.filter((route) => route.startsWith("/webshop/"));
   if (webshopRoutes.length > 0) {
-    // Prefer the most descriptive (deepest-nested) alias, not just whichever
-    // happens to come first in the array — that order isn't meaningful (it's
-    // whatever the original Magento export happened to discover first), so
-    // two products with an identical route shape could get inconsistent
-    // links: one showing its full category path, the other a flat one-
-    // segment alias for no real reason. Found 2026-09-11 comparing
-    // 0460-202-1631 (nested route listed first) against 1062-12-0144 (same
-    // shape of routes, but the flat one happened to be listed first).
-    //
-    // Filter out duplicate-segment routes first (see hasDuplicateSegment) so
-    // "prefer longest" can't pick a degenerate, corrupted-category route just
-    // because it's the longest string — found 2026-09-11 for HTP's
-    // FHN0-C0A5-C0A5, which was landing on ".../fuse-holder/fuse-holders/
-    // fuse-holder/..." instead of a real category path. Falls back to the
-    // full pool if every route happens to be degenerate.
-    const clean = webshopRoutes.filter((route) => !hasDuplicateSegment(route));
-    const pool = clean.length > 0 ? clean : webshopRoutes;
-    return pool.reduce((longest, route) => (route.length > longest.length ? route : longest));
+    return preferCleanestRoute(webshopRoutes);
   }
   return product.route ?? product.routes[0] ?? "#";
 }
