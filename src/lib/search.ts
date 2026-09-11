@@ -113,15 +113,26 @@ const magentoCatalogueIndex: IndexedResult[] = getAllCatalogueProducts()
     ];
 
     // All attribute values (covers Series, LADD Accessory Type, Material, etc.)
-    // except the technical cross-reference codes below (crimp tool numbers,
-    // DIN standard cross-references, application-image codes) — their values
-    // are internal codes, not descriptive text, and coincidentally collide
-    // with other real products' own SKUs often enough to surface as
-    // confusing, unrelated "hits". Found 2026-09-11: searching Vogt's SKU
-    // 491116 also matched product 461116, purely because 461116's "Nummer
-    // DIN" attribute happens to hold the string "491116" as a standard
-    // cross-reference. Audited the full catalogue: 67 products collide via
-    // "Nummer DIN" alone, 1,364 via "Werkzuege" (crimp tool codes).
+    // except the fields below, which name a DIFFERENT product rather than
+    // describing this one. Two distinct reasons a field ends up here:
+    //
+    // (a) Technical/internal cross-reference codes (crimp tool numbers, DIN
+    // standard cross-references, application-image codes) that coincidentally
+    // collide with another real product's own SKU. Found 2026-09-11:
+    // searching Vogt's SKU 491116 also matched product 461116, purely
+    // because 461116's "Nummer DIN" attribute happens to hold the string
+    // "491116" as a standard cross-reference. Audited the full catalogue: 67
+    // products collide via "Nummer DIN" alone, 1,364 via "Werkzuege" (crimp
+    // tool codes).
+    //
+    // (b) Genuine product-to-product cross-references (mating connector,
+    // required accessory/wedgelock, etc.) — not coincidental, but still not
+    // what a customer means when they search a specific part number. Stefan's
+    // rule: search should only surface what matches the string you typed,
+    // not incidental data buried on some OTHER product's page. Confirmed
+    // 2026-09-11 live: searching Vogt housing "39311pa" returned it plus two
+    // unrelated receptacles (3764w.67, 3765w.67) that merely list it as their
+    // own accessory. ~1,444 products combined carry one of these fields.
     const NON_SEARCHABLE_ATTRIBUTES = new Set([
       "Werkzuege",
       "Nummer DIN",
@@ -129,6 +140,12 @@ const magentoCatalogueIndex: IndexedResult[] = getAllCatalogueProducts()
       "Farbe DIN",
       "Farbe F",
       "Anwendungsbild",
+      "Mating Connectors",
+      "Required Wedgelock",
+      "Required Components",
+      "Accessories",
+      "Tab Connectors",
+      "Zubehör",
     ]);
     const attrValues = Object.entries(p.attributes ?? {})
       .filter(([key]) => !NON_SEARCHABLE_ATTRIBUTES.has(key))
