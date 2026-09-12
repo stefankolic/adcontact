@@ -36,6 +36,14 @@ type ProductSchemaInput = {
   /** Canonical page path for this product. */
   url: string;
   /**
+   * Plain-text category path, mirroring the Google Merchant Center feed's
+   * `google_product_category` so the on-page structured data and the feed
+   * agree on category as well as price (added 2026-09-12, after finding the
+   * feed had been carrying an incorrect category id — see
+   * [[seo-audit-fixes]]).
+   */
+  category?: string;
+  /**
    * Only present for parts that have a real, visible price on the page (the
    * outlet items). Quote-only parts get Product schema with no `offers` — an
    * offer without a price is malformed, and there's no price to show anyway.
@@ -57,6 +65,7 @@ export function productJsonLd(p: ProductSchemaInput) {
     sku: p.partNumber,
     mpn: p.partNumber,
     brand: { "@type": "Brand", name: p.brand },
+    ...(p.category ? { category: p.category } : {}),
     ...(p.description ? { description: p.description } : {}),
     ...(image ? { image } : {}),
     ...(p.offer

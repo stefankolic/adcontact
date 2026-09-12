@@ -9,6 +9,7 @@ import {
   outletComponentHref,
   outletComponentImageSrc,
 } from "@/data/deutschOutlet";
+import { deutschSeoTitleByPartNumber } from "@/data/deutschConnectors";
 
 const PAGE_SIZE = 50;
 
@@ -88,6 +89,14 @@ export default function OutletComponentsClient() {
             {shown.map((item) => {
               const href = outletComponentHref(item);
               const imageSrc = outletComponentImageSrc(item);
+              // Keeps the visible cell compact (a dense SKU table, not a
+              // place for a full sentence) while still giving crawlers and
+              // screen readers a fully descriptive, keyword-rich accessible
+              // name per part - the same SEO title used on the part's own
+              // page, so the two stay consistent (2026-09-12 SEO review).
+              const seoLabel = item.matchedPartNumber
+                ? deutschSeoTitleByPartNumber(item.matchedPartNumber)
+                : null;
               return (
                 <tr
                   key={item.sku}
@@ -116,6 +125,7 @@ export default function OutletComponentsClient() {
                     {href ? (
                       <Link
                         href={href}
+                        aria-label={seoLabel ? `Buy ${seoLabel} here` : undefined}
                         className="font-mono text-sm font-semibold text-[#0a1628] hover:text-[#2563eb]"
                       >
                         {item.description}

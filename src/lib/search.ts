@@ -1,5 +1,5 @@
 import { products } from "@/data/products";
-import { deutschProducts } from "@/data/deutschConnectors";
+import { deutschProducts, deutschSeoTitle } from "@/data/deutschConnectors";
 import {
   getAllCatalogueProducts,
   catalogueProductLegacyRoute,
@@ -53,7 +53,9 @@ const deutschIndex: IndexedResult[] = deutschProducts
   .map((d) => {
     const ways = d.ways ? `${d.ways}-way` : "";
     const type = d.type ?? "";
-    const name = ["DEUTSCH", d.partNumber, ways, type].filter(Boolean).join(" ");
+    // Matches the product page H1 / JSON-LD name / GMC feed title (2026-09-12
+    // SEO review) so a search result reads the same as the page it opens.
+    const name = deutschSeoTitle(d);
     const description = [d.series, "series", ways, type, "sealed connector"]
       .filter(Boolean)
       .join(" ");

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package, Tag } from "lucide-react";
 import type { Metadata } from "next";
 import { getProductDetail, type RelatedProduct, type DrawingFile } from "@/data/deutschProductDetails";
-import { deutschProducts } from "@/data/deutschConnectors";
+import { deutschProducts, seriesLabelFor, deutschSeoTitle } from "@/data/deutschConnectors";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { brands } from "@/data/brands";
 import {
@@ -21,20 +21,6 @@ export function generateStaticParams() {
   return deutschProducts.map((p) => ({ slug: p.partNumber.toLowerCase() }));
 }
 
-const SERIES_LABELS: Record<string, string> = {
-  DT: "DT Series",
-  DT13: "DT13 Flanged Series",
-  DT15: "DT15 Flanged Series",
-  DTF13: "DTF13 Flanged Series",
-  DTF15: "DTF15 Flanged Series",
-  DTM: "DTM Miniature Series",
-  DTP: "DTP Power Series",
-  HDP: "HDP Heavy Power Series",
-  JS: "JS Series",
-  SRK: "SRK Series",
-  AT: "AT Series",
-};
-
 type DeutschCatalogueProduct = (typeof deutschProducts)[number];
 
 /** One source of truth for the part's one-line description — used for both the
@@ -46,7 +32,7 @@ function productDescription(
   if (detail) {
     return `${cp.partNumber}: ${detail.specs["Series"] ?? "Deutsch"} sealed connector, ${detail.specs["No. of cavities"] ?? ""} way, contact size ${detail.specs["Contact Size"] ?? ""}. Request a quote from Adcontact Sweden.`;
   }
-  return `${cp.partNumber}: ${SERIES_LABELS[cp.series] ?? cp.series} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
+  return `${cp.partNumber}: ${seriesLabelFor(cp.series)} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -258,7 +244,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const outletListing = deutschOutletComponents.find(
     (o) => o.matchedPartNumber?.toUpperCase() === partNumber.toUpperCase(),
   );
-  const seriesLabel = SERIES_LABELS[catalogueProduct.series] ?? catalogueProduct.series;
+  const seriesLabel = seriesLabelFor(catalogueProduct.series);
   const seriesColor = SERIES_COLORS[catalogueProduct.series] ?? "bg-slate-50 text-slate-700 border-slate-200";
 
   // Pull Magento catalogue data for every product — provides specs, contacts, accessories, files.
@@ -315,10 +301,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const hasDetailAccessories = detail && detail.accessories.length > 0;
 
   const pagePath = `/products/deutsch-connectors/${slug}`;
+  const seoTitle = deutschSeoTitle(catalogueProduct);
   const productLd = productJsonLd({
-    name: `Deutsch ${partNumber}${seriesLabel ? `, ${seriesLabel}` : ""}`,
+    name: seoTitle,
     partNumber,
     brand: "Deutsch",
+    category: "Hardware > Power & Electrical Supplies > Wire Terminals & Connectors",
     description: productDescription(catalogueProduct, detail),
     image: mainImage,
     url: pagePath,
@@ -429,8 +417,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <span className="text-xs text-[#64748b]">Deutsch</span>
             </div>
 
-            <h1 className="text-3xl lg:text-4xl font-bold text-[#0a1628] mb-2 font-mono tracking-tight">
-              {partNumber}
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#0a1628] mb-2 tracking-tight">
+              {seoTitle}
             </h1>
             <p className="text-[#64748b] text-sm mb-5">
               {seriesLabel}

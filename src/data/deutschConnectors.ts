@@ -32,3 +32,51 @@ export const deutschProducts = (
 export function getDeutschWebshopUrl(product: DeutschProduct): string {
   return `/webshop/${product.urlPath}`;
 }
+
+// Full display name for a series code — only some codes have a distinct
+// marketing name (Deutsch's own naming, e.g. "HDP" = "Heavy Power"); every
+// other code falls back to "<code> Series" rather than the bare code alone,
+// matching the convention used everywhere else this series label appears
+// (product page subtitle, GMC feed, search results).
+export const SERIES_LABELS: Record<string, string> = {
+  DT: "DT Series",
+  DT13: "DT13 Flanged Series",
+  DT15: "DT15 Flanged Series",
+  DTF13: "DTF13 Flanged Series",
+  DTF15: "DTF15 Flanged Series",
+  DTM: "DTM Miniature Series",
+  DTP: "DTP Power Series",
+  HDP: "HDP Heavy Power Series",
+  JS: "JS Series",
+  SRK: "SRK Series",
+  AT: "AT Series",
+};
+
+export function seriesLabelFor(series: string): string {
+  return SERIES_LABELS[series] ?? `${series} Series`;
+}
+
+/**
+ * The SEO title format shared by the product page H1, its JSON-LD `name`,
+ * search-result snippets, and the Google Merchant Center feed (2026-09-12,
+ * per Stefan's SEO review) — one shared builder so these can't drift apart
+ * the way `catalogueProductLegacyRoute()`/`productHref()` did earlier this
+ * project (see [[webshop-catalogue-patterns]]). Every Deutsch product has a
+ * `series`; `type` is always "Plug" or "Socket" (never a non-connector
+ * accessory), so "connector, for wire processing" is accurate for all 1,794
+ * entries, not just the outlet-priced ones.
+ */
+export function deutschSeoTitle(product: DeutschProduct): string {
+  const series = seriesLabelFor(product.series);
+  const wayType = product.ways && product.type ? `, ${product.ways}-Way ${product.type}` : "";
+  return `Deutsch ${product.partNumber}, ${series}${wayType}, connector, for wire processing`;
+}
+
+/** Convenience wrapper for callers that only have a part number string
+ *  (e.g. the outlet table, matching against `matchedPartNumber`). */
+export function deutschSeoTitleByPartNumber(partNumber: string): string | null {
+  const product = deutschProducts.find(
+    (p) => p.partNumber.toUpperCase() === partNumber.toUpperCase(),
+  );
+  return product ? deutschSeoTitle(product) : null;
+}
