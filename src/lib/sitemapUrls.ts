@@ -20,7 +20,34 @@ export type SitemapEntry = {
   path: string;
   priority: number;
   changeFrequency: "daily" | "weekly" | "monthly";
+  /** ISO date the page's content last meaningfully changed, when known. */
+  lastModified?: string;
 };
+
+/**
+ * Marks the date a whole section of the site last had a meaningful content
+ * change, so the sitemap can tell Google "look at these again" instead of
+ * waiting for its own recrawl schedule. Deliberately NOT derived from build
+ * time — this project deploys many times a day for unrelated fixes, and
+ * Google explicitly down-weights a sitemap that claims every page changed on
+ * every fetch (see the "force-static" comment in sitemap.ts for the related
+ * lesson about Google's crawler being picky about this feed specifically).
+ *
+ * Update this list when you ship a change broad/important enough that you
+ * want Google to notice sooner rather than later (add a new entry, or bump
+ * an existing date) — don't touch entries whose pages didn't actually
+ * change. `prefix` matches any sitemap path starting with it.
+ */
+const LASTMOD_OVERRIDES: { prefix: string; date: string }[] = [
+  // 2026-09-12: all 1,794 Deutsch connector pages got a new SEO-optimised
+  // H1/JSON-LD (title format matching the GMC feed, corrected category) -
+  // see [[seo-audit-fixes]].
+  { prefix: "/products/deutsch-connectors/", date: "2026-09-12" },
+];
+
+function lastModifiedFor(path: string): string | undefined {
+  return LASTMOD_OVERRIDES.find((o) => path.startsWith(o.prefix))?.date;
+}
 
 // Deutsch products get a richer dedicated page — the webshop [...path] route
 // permanently redirects to it (see src/app/webshop/[...path]/page.tsx). Listing
@@ -128,7 +155,12 @@ export function getAllSitemapEntries(): SitemapEntry[] {
     add({ path, priority: 0.5, changeFrequency: "monthly" });
   }
 
-  cached = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path));
+  cached = [...byPath.values()]
+    .map((entry) => {
+      const lastModified = lastModifiedFor(entry.path);
+      return lastModified ? { ...entry, lastModified } : entry;
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
   return cached;
 }
 

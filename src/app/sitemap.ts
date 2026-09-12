@@ -26,9 +26,10 @@ export default async function sitemap({
   const start = chunkId * SITEMAP_CHUNK_SIZE;
   const entries = getAllSitemapEntries().slice(start, start + SITEMAP_CHUNK_SIZE);
 
-  return entries.map(({ path, priority, changeFrequency }) => ({
+  return entries.map(({ path, priority, changeFrequency, lastModified }) => ({
     url: absoluteUrl(path),
     changeFrequency,
     priority,
+    ...(lastModified ? { lastModified } : {}),
   }));
 }
