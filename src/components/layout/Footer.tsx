@@ -33,6 +33,7 @@ const footerLinks = {
     { label: "About Adcontact", href: "/about" },
     { label: "Quality & ISO", href: "/quality" },
     { label: "Contact & Offices", href: "/contact" },
+    { label: "Shipping & Export", href: "/policies/shipping" },
   ],
 };
 

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const policies = [
   { label: "Privacy Policy", href: "/policies/privacy", description: "How we collect and handle personal data." },
-  { label: "Shipping Policy", href: "/policies/shipping", description: "Delivery terms, forwarder, and collection options." },
+  { label: "Shipping & Export Policy", href: "/policies/shipping", description: "Delivery terms, forwarder, collection options, and export shipments." },
   { label: "Return & Refund Policy", href: "/policies/returns", description: "Claim periods, return conditions, and the approval process." },
   { label: "Cookie Policy", href: "/policies/cookies", description: "How we use cookies and how to manage them." },
   { label: "General Terms of Delivery", href: "/policies/terms", description: "Our standard delivery terms (IML 2009)." },

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Tag, Wrench } from "lucide-react";
+import { ArrowRight, Tag, Wrench } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import { absoluteUrl } from "@/lib/seo";
 
@@ -24,6 +24,7 @@ const sections = [
     icon: Wrench,
     description:
       "Secondhand cutting, stripping and crimping machines, sourced through our supplier network. Condition, equipment and specifications listed per machine.",
+    ctaLabel: "Browse secondhand cutting and crimping machines",
     brands: [{ label: "Komax", href: "/outlet/used-machines" }],
   },
   {
@@ -32,6 +33,7 @@ const sections = [
     icon: Tag,
     description:
       "Surplus stock from our own warehouse, at outlet pricing while quantities last. Sold as-is, no returns.",
+    ctaLabel: "Browse Deutsch connector outlet stock",
     brands: [{ label: "Deutsch", href: "/outlet/components" }],
   },
 ];
@@ -47,7 +49,7 @@ export default function OutletPage() {
 
       <main className="mx-auto max-w-[1440px] px-6 py-12">
         <div className="grid gap-5 sm:grid-cols-2">
-          {sections.map(({ label, icon: Icon, description, brands: sectionBrands }) => (
+          {sections.map(({ label, href, icon: Icon, description, ctaLabel, brands: sectionBrands }) => (
             <div
               key={label}
               className="flex flex-col rounded-2xl border border-[#e2e8f0] bg-white p-7"
@@ -55,8 +57,19 @@ export default function OutletPage() {
               <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#fef3c7] text-[#b45309]">
                 <Icon size={20} />
               </span>
-              <h2 className="mt-4 text-lg font-bold text-[#0a1628]">{label}</h2>
+              <h2 className="mt-4 text-lg font-bold text-[#0a1628]">
+                <Link href={href} className="hover:text-[#2563eb] transition-colors">
+                  {label}
+                </Link>
+              </h2>
               <p className="mt-2 text-sm leading-6 text-[#475569]">{description}</p>
+              <Link
+                href={href}
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2563eb] hover:text-[#1d4ed8] transition-colors"
+              >
+                {ctaLabel}
+                <ArrowRight size={14} />
+              </Link>
 
               <div className="mt-5 flex flex-wrap gap-3 border-t border-[#f1f5f9] pt-5">
                 {sectionBrands.map((brand) => (
