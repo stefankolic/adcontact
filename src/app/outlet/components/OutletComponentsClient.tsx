@@ -10,12 +10,33 @@ import {
   outletComponentImageSrc,
 } from "@/data/deutschOutlet";
 import { deutschSeoTitleByPartNumber } from "@/data/deutschConnectors";
+import { PILOT_CHECKOUT_SKUS } from "@/data/outletCheckoutPilot";
 
 const PAGE_SIZE = 50;
 
 export default function OutletComponentsClient() {
   const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [buyingSku, setBuyingSku] = useState<string | null>(null);
+
+  async function handleBuyNow(sku: string) {
+    setBuyingSku(sku);
+    try {
+      const res = await fetch("/api/outlet-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sku }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.assign(data.url);
+      } else {
+        setBuyingSku(null);
+      }
+    } catch {
+      setBuyingSku(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -143,16 +164,27 @@ export default function OutletComponentsClient() {
                     €{item.priceEur.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <a
-                      href={`mailto:info@adcontact.se?subject=${encodeURIComponent(
-                        `Outlet enquiry: ${item.sku}`
-                      )}&body=${encodeURIComponent(
-                        `Hi,\n\nI'd like to order the following from your components outlet:\n\nSKU: ${item.sku}\nPart / description: ${item.description}\nQuantity wanted: \n\nThanks!`
-                      )}`}
-                      className="text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8]"
-                    >
-                      Enquire →
-                    </a>
+                    {PILOT_CHECKOUT_SKUS.has(item.sku) ? (
+                      <button
+                        type="button"
+                        onClick={() => handleBuyNow(item.sku)}
+                        disabled={buyingSku === item.sku}
+                        className="rounded-md bg-[#f59e0b] px-3 py-1.5 text-xs font-semibold text-[#0a1628] transition-colors hover:bg-[#d97706] disabled:opacity-60"
+                      >
+                        {buyingSku === item.sku ? "Redirecting…" : "Buy now"}
+                      </button>
+                    ) : (
+                      <a
+                        href={`mailto:info@adcontact.se?subject=${encodeURIComponent(
+                          `Outlet enquiry: ${item.sku}`
+                        )}&body=${encodeURIComponent(
+                          `Hi,\n\nI'd like to order the following from your components outlet:\n\nSKU: ${item.sku}\nPart / description: ${item.description}\nQuantity wanted: \n\nThanks!`
+                        )}`}
+                        className="text-xs font-semibold text-[#2563eb] hover:text-[#1d4ed8]"
+                      >
+                        Enquire →
+                      </a>
+                    )}
                   </td>
                 </tr>
               );
