@@ -44,14 +44,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true });
   }
 
+  // The session's own line item carries the actual quantity the buyer chose
+  // via adjustable_quantity - it's not on session.metadata, which is fixed
+  // at session-creation time.
+  const lineItems = await getStripe().checkout.sessions.listLineItems(session.id, { limit: 1 });
+  const quantity = lineItems.data[0]?.quantity ?? 1;
+
   const sql = getDb();
 
   const inserted = await sql`
-    INSERT INTO outlet_orders (stripe_session_id, sku, description, amount_eur, customer_email)
+    INSERT INTO outlet_orders (stripe_session_id, sku, description, quantity, amount_eur, customer_email)
     VALUES (
       ${session.id},
       ${sku},
       ${description},
+      ${quantity},
       ${session.amount_total != null ? session.amount_total / 100 : 0},
       ${session.customer_details?.email ?? null}
     )
@@ -66,8 +73,8 @@ export async function POST(req: Request) {
 
   const decremented = await sql`
     UPDATE outlet_inventory
-    SET quantity_remaining = quantity_remaining - 1, updated_at = now()
-    WHERE sku = ${sku} AND quantity_remaining > 0
+    SET quantity_remaining = quantity_remaining - ${quantity}, updated_at = now()
+    WHERE sku = ${sku} AND quantity_remaining >= ${quantity}
     RETURNING quantity_remaining
   `;
 

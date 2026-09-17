@@ -43,11 +43,16 @@ export async function POST(req: Request) {
 
   const origin = new URL(req.url).origin;
 
+  // Stripe's own adjustable_quantity.maximum hard-caps at 99 regardless of
+  // how much stock we actually have.
+  const maxQty = Math.max(1, Math.min(row.quantity_remaining, 99));
+
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     line_items: [
       {
         quantity: 1,
+        adjustable_quantity: { enabled: true, minimum: 1, maximum: maxQty },
         price_data: {
           currency: "eur",
           unit_amount: Math.round(item.priceEur * 100),

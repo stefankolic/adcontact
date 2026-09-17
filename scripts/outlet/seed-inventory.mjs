@@ -40,6 +40,7 @@ async function main() {
       stripe_session_id TEXT UNIQUE NOT NULL,
       sku TEXT NOT NULL,
       description TEXT,
+      quantity INTEGER NOT NULL DEFAULT 1,
       amount_eur NUMERIC(10, 2) NOT NULL,
       customer_email TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
