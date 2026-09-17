@@ -33,6 +33,11 @@ export async function POST() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  // outlet_orders may already exist from before this column was added -
+  // the Neon branch behind this deployment turned out to persist across
+  // git-push-triggered builds (only ad-hoc `vercel deploy` CLI runs get a
+  // throwaway branch), so CREATE TABLE IF NOT EXISTS alone won't migrate it.
+  await sql`ALTER TABLE outlet_orders ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 1`;
 
   let seeded = 0;
   for (const item of deutschOutletComponents) {
