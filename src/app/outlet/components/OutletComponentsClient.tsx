@@ -18,9 +18,11 @@ export default function OutletComponentsClient() {
   const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [buyingSku, setBuyingSku] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   async function handleBuyNow(sku: string) {
     setBuyingSku(sku);
+    setCheckoutError(null);
     try {
       const res = await fetch("/api/outlet-checkout", {
         method: "POST",
@@ -30,10 +32,16 @@ export default function OutletComponentsClient() {
       const data = await res.json();
       if (data.url) {
         window.location.assign(data.url);
-      } else {
-        setBuyingSku(null);
+        return;
       }
+      setCheckoutError(
+        res.status === 409
+          ? "Sorry, this item just sold out."
+          : "Something went wrong starting checkout - please try again or use Enquire.",
+      );
     } catch {
+      setCheckoutError("Something went wrong starting checkout - please try again or use Enquire.");
+    } finally {
       setBuyingSku(null);
     }
   }
@@ -56,6 +64,11 @@ export default function OutletComponentsClient() {
 
   return (
     <section>
+      {checkoutError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+          {checkoutError}
+        </div>
+      )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-sm">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" />

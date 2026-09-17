@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
+import { getDb } from "@/lib/db";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { PILOT_CHECKOUT_SKUS } from "@/data/outletCheckoutPilot";
 
@@ -27,6 +28,17 @@ export async function POST(req: Request) {
   const item = deutschOutletComponents.find((o) => o.sku === sku);
   if (!item) {
     return NextResponse.json({ error: "Unknown SKU" }, { status: 404 });
+  }
+
+  // Check live stock (not the static outlet snapshot's quantity) before
+  // creating a session at all - the whole point of the live inventory table
+  // is that a sold-out item can't be checked out again.
+  const sql = getDb();
+  const [row] = await sql`
+    SELECT quantity_remaining FROM outlet_inventory WHERE sku = ${sku}
+  `;
+  if (!row || row.quantity_remaining <= 0) {
+    return NextResponse.json({ error: "Sold out" }, { status: 409 });
   }
 
   const origin = new URL(req.url).origin;
