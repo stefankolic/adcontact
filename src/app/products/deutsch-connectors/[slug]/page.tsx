@@ -402,10 +402,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   </Link>
                 </p>
                 {PILOT_CHECKOUT_SKUS.has(outletListing.sku) && (
-                  <BuyOutletButton
-                    sku={outletListing.sku}
-                    className="mt-3 rounded-md bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-600 disabled:opacity-60"
-                  />
+                  <div className="mt-3">
+                    <BuyOutletButton
+                      sku={outletListing.sku}
+                      maxQuantity={Math.min(outletListing.quantity, 99)}
+                      className="rounded-md bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-600 disabled:opacity-60"
+                    />
+                  </div>
                 )}
               </div>
             )}

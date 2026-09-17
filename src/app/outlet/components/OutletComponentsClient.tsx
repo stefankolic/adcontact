@@ -148,6 +148,7 @@ export default function OutletComponentsClient() {
                     {PILOT_CHECKOUT_SKUS.has(item.sku) ? (
                       <BuyOutletButton
                         sku={item.sku}
+                        maxQuantity={Math.min(item.quantity, 99)}
                         className="rounded-md bg-[#f59e0b] px-3 py-1.5 text-xs font-semibold text-[#0a1628] transition-colors hover:bg-[#d97706] disabled:opacity-60"
                       />
                     ) : (

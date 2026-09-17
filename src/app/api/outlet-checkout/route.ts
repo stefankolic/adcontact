@@ -16,10 +16,15 @@ import { PILOT_CHECKOUT_SKUS } from "@/data/outletCheckoutPilot";
  * the full outlet catalogue and Stripe-side reporting per-SKU becomes useful.
  */
 export async function POST(req: Request) {
-  const { sku } = await req.json();
+  const { sku, quantity } = await req.json();
   if (typeof sku !== "string") {
     return NextResponse.json({ error: "Missing sku" }, { status: 400 });
   }
+  // The buyer picks quantity on our own page (a real, visible stepper) -
+  // Stripe's own adjustable_quantity control on the hosted checkout page is
+  // small and easy to miss, so it's kept only as a fallback for last-minute
+  // changes, not the primary way to choose an amount.
+  const requestedQuantity = Number.isInteger(quantity) && quantity > 0 ? quantity : 1;
 
   if (!PILOT_CHECKOUT_SKUS.has(sku)) {
     return NextResponse.json({ error: "Not available for direct purchase" }, { status: 403 });
@@ -40,6 +45,12 @@ export async function POST(req: Request) {
   if (!row || row.quantity_remaining <= 0) {
     return NextResponse.json({ error: "Sold out" }, { status: 409 });
   }
+  if (requestedQuantity > row.quantity_remaining) {
+    return NextResponse.json(
+      { error: `Only ${row.quantity_remaining} left in stock` },
+      { status: 409 },
+    );
+  }
 
   const origin = new URL(req.url).origin;
 
@@ -51,7 +62,7 @@ export async function POST(req: Request) {
     mode: "payment",
     line_items: [
       {
-        quantity: 1,
+        quantity: requestedQuantity,
         adjustable_quantity: { enabled: true, minimum: 1, maximum: maxQty },
         price_data: {
           currency: "eur",
