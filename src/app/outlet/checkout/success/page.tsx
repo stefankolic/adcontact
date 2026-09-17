@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2, ArrowRight } from "lucide-react";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export const metadata = { title: "Order confirmed" };
 
@@ -11,7 +11,7 @@ export default async function CheckoutSuccessPage({
 }) {
   const { session_id } = await searchParams;
   const session = session_id
-    ? await stripe.checkout.sessions.retrieve(session_id).catch(() => null)
+    ? await getStripe().checkout.sessions.retrieve(session_id).catch(() => null)
     : null;
 
   const description = session?.metadata?.outletDescription;

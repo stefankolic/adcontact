@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { PILOT_CHECKOUT_SKUS } from "@/data/outletCheckoutPilot";
 
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   const origin = new URL(req.url).origin;
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     line_items: [
       {
