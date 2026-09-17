@@ -322,10 +322,20 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
-      />
+      {/* Product schema only when there's a genuine offer (outlet-priced parts).
+          Google's Product rich-result validator requires offers, review, or
+          aggregateRating - this site has no review system, and quote-only
+          parts have no real price to publish, so declaring an incomplete
+          Product for them just trips that validator (GSC flagged this
+          2026-09-17: "Ange antingen offers, review eller aggregateRating")
+          without ever being able to satisfy it. Breadcrumbs carry no such
+          requirement and stay on every page. */}
+      {outletListing && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}

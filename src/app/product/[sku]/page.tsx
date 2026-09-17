@@ -9,7 +9,7 @@ import {
   productDetailHref,
   type UnifiedProduct,
 } from "@/data/productLookup";
-import { productJsonLd, breadcrumbJsonLd } from "@/lib/productSchema";
+import { breadcrumbJsonLd } from "@/lib/productSchema";
 import QuoteForm from "@/components/QuoteForm";
 import { brands } from "@/data/brands";
 
@@ -116,16 +116,13 @@ export default async function ProductPage({ params }: Props) {
 
   const related = getRelatedProducts(product, 6);
 
-  const productLd = productJsonLd({
-    name: `${product.brand} ${product.sku}`,
-    partNumber: product.sku,
-    brand: product.brand,
-    description: productDescription(product),
-    image,
-    url: productDetailHref(product.sku),
-    // Quote-only on this template — outlet items are all Deutsch, which
-    // redirects to the rich page above, so no priced offer here.
-  });
+  // No Product schema on this template: every product here is quote-only
+  // (outlet items are all Deutsch, which redirects to the rich page above),
+  // so there's never a real offer to publish, and no review system exists
+  // either - Google's Product rich-result validator requires offers,
+  // review, or aggregateRating, and declaring an incomplete Product here
+  // just trips that check without ever being able to satisfy it (GSC
+  // flagged this 2026-09-17). Breadcrumbs carry no such requirement.
   const breadcrumbLd = breadcrumbJsonLd([
     { name: "Home", url: "/" },
     { name: "Webshop", url: "/webshop.html" },
@@ -135,10 +132,6 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
