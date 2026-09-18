@@ -1,8 +1,46 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { getDb } from "@/lib/db";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
+
+/**
+ * Flat-rate shipping by region (Stefan's pricing, 2026-09-18), not computed
+ * per order. Order matters: Stripe pre-selects the FIRST option for the
+ * buyer on the hosted checkout page. Deliberately defaulting to a €45 tier
+ * rather than the cheaper Sweden/Estonia rate - an inattentive buyer then
+ * "corrects down" only by actively picking the cheap option, instead of an
+ * out-of-region buyer accidentally leaving the cheap one pre-selected.
+ *
+ * "Outside EU/EEA" is worded generically on purpose - the United Kingdom is
+ * today's only real example, but the same tier/price and customs-excluded
+ * disclosure should apply to any future non-EU/EEA destination without
+ * needing new code, just an addition to allowed_countries below.
+ */
+const SHIPPING_OPTIONS: Stripe.Checkout.SessionCreateParams.ShippingOption[] = [
+  {
+    shipping_rate_data: {
+      type: "fixed_amount",
+      fixed_amount: { amount: 4500, currency: "eur" },
+      display_name: "Rest of EU/EEA",
+    },
+  },
+  {
+    shipping_rate_data: {
+      type: "fixed_amount",
+      fixed_amount: { amount: 4500, currency: "eur" },
+      display_name: "Outside EU/EEA (e.g. United Kingdom) - customs excl.",
+    },
+  },
+  {
+    shipping_rate_data: {
+      type: "fixed_amount",
+      fixed_amount: { amount: 2500, currency: "eur" },
+      display_name: "Sweden & Estonia",
+    },
+  },
+];
 
 /**
  * Creates a Stripe Checkout Session for one outlet line item and returns the
@@ -78,7 +116,8 @@ export async function POST(req: Request) {
     // Individuals (not just businesses) must be able to buy - a GMC
     // eligibility requirement, see the outlet-checkout memory playbook -
     // Checkout collects the buyer's shipping address for physical fulfillment.
-    shipping_address_collection: { allowed_countries: ["SE", "EE", "NO", "DK", "FI", "DE"] },
+    shipping_address_collection: { allowed_countries: ["SE", "EE", "NO", "DK", "FI", "DE", "GB"] },
+    shipping_options: SHIPPING_OPTIONS,
     metadata: { sku: item.sku, outletDescription: item.description },
     success_url: `${origin}/outlet/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/outlet/components`,
