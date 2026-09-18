@@ -1,27 +1,29 @@
+import {
+  deutschOutletComponents,
+  outletComponentHref,
+  outletComponentImageSrc,
+} from "@/data/deutschOutlet";
+
 /**
- * Pilot batch for the outlet's real Stripe checkout (2026-09), per Stefan's
- * "controlled quantities" rollout plan — only these SKUs get a real "Buy Now"
- * button; every other outlet row keeps the existing "Enquire" mailto flow
- * until the pilot proves out end-to-end (checkout -> webhook -> stock
- * decrement -> actual fulfillment), then this list widens to the rest of the
- * outlet catalogue. See the outlet-checkout memory playbook for the full plan.
+ * SKUs eligible for a real "Buy now" checkout - every outlet row that has
+ * BOTH a real linked product page AND a real photo. This is deliberately the
+ * exact same "real image + real page" rule the Google Merchant Center feed
+ * itself uses (see the outlet-completion-procedure memory playbook), not a
+ * separately maintained list - a row that gains a real photo through that
+ * ongoing process becomes checkout-eligible automatically on the next
+ * deploy, no code change needed per SKU.
  *
- * Picked for a clean pilot: matched to a real product page, moderate price
- * (1-15 EUR) and moderate stock (10-100 units) - not the cheapest cent-level
- * rows or the largest batches, to keep the first real transactions easy to
- * reason about.
+ * Started 2026-09-17 as a hand-picked 12-SKU pilot batch to prove the full
+ * loop (checkout -> webhook -> stock decrement -> fulfillment) end-to-end
+ * before trusting it with the full catalogue. Widened to this computed rule
+ * 2026-09-18 once the pilot proved out and Stefan asked to launch on every
+ * GMC/GSC-relevant item (currently ~150 of 260 rows) — see the outlet-
+ * checkout-stripe-project memory playbook for the full history.
  */
-export const PILOT_CHECKOUT_SKUS = new Set<string>([
-  "242001-0812", // DT06-08SA-CE12
-  "242001-121", // DT06-12SB
-  "242001-123", // DT06-12SD Brown
-  "242002-121", // DT04-12PB Black
-  "242002-122", // DT04-12PC
-  "242002-123", // DT04-12PD Brown
-  "242006-004", // DTHD06-1-4S
-  "242006-008", // DTHD06-1-8S
-  "242006-012", // DTHD06-1-12S
-  "242006-0413", // DT06-4S-CE13
-  "242007-004", // DTHD04-1-4P
-  "242012-040", // DT06-4S-LC01
-]);
+export const CHECKOUT_ELIGIBLE_SKUS: Set<string> = new Set(
+  deutschOutletComponents
+    .filter(
+      (item) => outletComponentHref(item) !== null && outletComponentImageSrc(item) !== null,
+    )
+    .map((item) => item.sku),
+);

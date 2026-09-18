@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getDb } from "@/lib/db";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
-import { PILOT_CHECKOUT_SKUS } from "@/data/outletCheckoutPilot";
+import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 
 /**
  * Creates a Stripe Checkout Session for one outlet line item and returns the
- * hosted checkout URL to redirect to. Pilot-only: only SKUs in
- * PILOT_CHECKOUT_SKUS are allowed through, even if a request is crafted by
- * hand for a non-pilot SKU - defense in depth, not just a UI-level gate.
+ * hosted checkout URL to redirect to. Only SKUs in CHECKOUT_ELIGIBLE_SKUS
+ * (real page + real image, same rule the GMC feed uses) are allowed through,
+ * even if a request is crafted by hand for an ineligible SKU - defense in
+ * depth, not just a UI-level gate.
  *
  * Uses ad-hoc `price_data` per session rather than pre-syncing outlet rows
  * into Stripe's own Product/Price catalog - simpler for a v1 pilot, nothing
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
   // changes, not the primary way to choose an amount.
   const requestedQuantity = Number.isInteger(quantity) && quantity > 0 ? quantity : 1;
 
-  if (!PILOT_CHECKOUT_SKUS.has(sku)) {
+  if (!CHECKOUT_ELIGIBLE_SKUS.has(sku)) {
     return NextResponse.json({ error: "Not available for direct purchase" }, { status: 403 });
   }
 

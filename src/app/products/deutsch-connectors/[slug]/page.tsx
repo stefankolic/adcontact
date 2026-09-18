@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import { getProductDetail, type RelatedProduct, type DrawingFile } from "@/data/deutschProductDetails";
 import { deutschProducts, seriesLabelFor, deutschSeoTitle } from "@/data/deutschConnectors";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
-import { PILOT_CHECKOUT_SKUS } from "@/data/outletCheckoutPilot";
+import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
 import { brands } from "@/data/brands";
 import {
@@ -401,7 +401,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     Browse the Components Outlet
                   </Link>
                 </p>
-                {PILOT_CHECKOUT_SKUS.has(outletListing.sku) && (
+                {CHECKOUT_ELIGIBLE_SKUS.has(outletListing.sku) && (
                   <div className="mt-3">
                     <BuyOutletButton
                       sku={outletListing.sku}

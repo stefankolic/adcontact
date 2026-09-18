@@ -10,7 +10,7 @@ import {
   outletComponentImageSrc,
 } from "@/data/deutschOutlet";
 import { deutschSeoTitleByPartNumber } from "@/data/deutschConnectors";
-import { PILOT_CHECKOUT_SKUS } from "@/data/outletCheckoutPilot";
+import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
 
 const PAGE_SIZE = 50;
@@ -145,7 +145,7 @@ export default function OutletComponentsClient() {
                     €{item.priceEur.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {PILOT_CHECKOUT_SKUS.has(item.sku) ? (
+                    {CHECKOUT_ELIGIBLE_SKUS.has(item.sku) ? (
                       <BuyOutletButton
                         sku={item.sku}
                         maxQuantity={Math.min(item.quantity, 99)}
