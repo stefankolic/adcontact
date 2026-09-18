@@ -22,7 +22,7 @@ export default function ShippingPolicyPage() {
         <p>Goods can be picked up at our distribution center in Keila, Estonia.</p>
         <p>For export shipments, we prepare the necessary customs and export documentation on request.</p>
         <p>
-          For shipments outside the EU/EEA (currently the United Kingdom), any customs duties, import VAT, or handling fees charged on arrival are the buyer&apos;s own responsibility and are not included in our shipping charge.
+          For shipments to the United Kingdom, and to any other country outside the EU/EEA, any customs duties, import VAT, or handling fees charged on arrival are the buyer&apos;s own responsibility and are not included in our shipping charge.
         </p>
         <p>
           For further questions feel free to contact us by using the form under &quot;Contact us&quot;.
