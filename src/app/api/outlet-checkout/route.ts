@@ -123,5 +123,5 @@ export async function POST(req: Request) {
     cancel_url: `${origin}/outlet/components`,
   });
 
-  return NextResponse.json({ url: session.url });
+  return NextResponse.json({ url: session.url, shippingOptions: session.shipping_options });
 }
