@@ -14,7 +14,7 @@ export default function ReturnsPolicyPage() {
       <h1 className="text-2xl font-bold text-[#0a1628] mt-4 mb-6">Return & Refund Policy</h1>
       <div className="prose prose-sm text-[#374151] leading-7 space-y-4 max-w-2xl">
         <p>
-          We operate exclusively in the B2B sector, where each customer has an individual commercial agreement established with us.
+          Most of our business is B2B, where each customer has an individual commercial agreement with us. The terms below apply to those purchases. A small number of products in our Components Outlet are also available for direct purchase by individuals, if that&apos;s you, see &quot;For individual consumers&quot; below, which takes priority for that purchase.
         </p>
         <p>
           We offer an 8-day claim period from the date of receival for any issues related to received goods. All claims must be submitted in writing within this period, including a description of the issue and relevant documentation.
@@ -24,6 +24,22 @@ export default function ReturnsPolicyPage() {
         </p>
         <p>
           For further questions feel free to contact us by using the form under &quot;Contact us&quot;.
+        </p>
+        <h2 className="text-lg font-bold text-[#0a1628] pt-2">For individual consumers (EU/EEA)</h2>
+        <p>
+          If you&apos;re a private individual (not buying for your business) and purchased through our Components Outlet checkout, EU law gives you a 14-day right of withdrawal from the day you receive the goods, for any reason, no explanation needed.
+        </p>
+        <p>
+          To withdraw, tell us clearly within those 14 days, email us via the Contact form, stating your order and that you wish to cancel. You then have a further 14 days to send the goods back.
+        </p>
+        <p>
+          Return shipping is at your own cost, unless we&apos;ve agreed otherwise in writing. Once we receive the goods back (or you provide proof you&apos;ve sent them), we&apos;ll refund your payment within 14 days, using your original payment method.
+        </p>
+        <p>
+          You&apos;re welcome to inspect and test the item as you would in a shop before buying. If it&apos;s been used, altered, or handled beyond that, for example soldered, crimped into a harness, or otherwise permanently changed, we may deduct an amount reflecting the reduction in its value from your refund.
+        </p>
+        <p>
+          This section applies only to purchases made as an individual consumer through the Components Outlet checkout. It doesn&apos;t change the terms above for our standard B2B trade.
         </p>
         <p className="font-medium">Thank you!</p>
       </div>
