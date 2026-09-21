@@ -34,6 +34,7 @@ const footerLinks = {
     { label: "Quality & ISO", href: "/quality" },
     { label: "Contact & Offices", href: "/contact" },
     { label: "Shipping & Export", href: "/policies/shipping" },
+    { label: "Withdraw from contract here", href: "/policies/withdraw" },
   ],
 };
 

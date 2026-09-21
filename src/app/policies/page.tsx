@@ -13,6 +13,7 @@ const policies = [
   { label: "Return & Refund Policy", href: "/policies/returns", description: "Claim periods, return conditions, and the approval process." },
   { label: "Cookie Policy", href: "/policies/cookies", description: "How we use cookies and how to manage them." },
   { label: "General Terms of Delivery", href: "/policies/terms", description: "Our standard delivery terms (IML 2009)." },
+  { label: "Withdraw from contract", href: "/policies/withdraw", description: "For private individuals: withdraw within 14 days of receiving your goods." },
 ];
 
 export default function PoliciesIndexPage() {

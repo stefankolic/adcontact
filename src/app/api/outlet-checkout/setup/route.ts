@@ -48,6 +48,20 @@ export async function POST(req: Request) {
   // throwaway branch), so CREATE TABLE IF NOT EXISTS alone won't migrate it.
   await sql`ALTER TABLE outlet_orders ADD COLUMN IF NOT EXISTS quantity INTEGER NOT NULL DEFAULT 1`;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS outlet_withdrawals (
+      id SERIAL PRIMARY KEY,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      order_ref TEXT,
+      matched_stripe_session_id TEXT,
+      matched_description TEXT,
+      ack_sent_at TIMESTAMPTZ,
+      notify_sent_at TIMESTAMPTZ
+    )
+  `;
+
   let seeded = 0;
   for (const item of deutschOutletComponents) {
     const result = await sql`

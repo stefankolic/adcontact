@@ -33,6 +33,12 @@ export default async function CheckoutSuccessPage({
           <>Thanks for your order. You&apos;ll receive an email receipt shortly, and we&apos;ll be in touch with shipping details.</>
         )}
       </p>
+      <p className="mb-6 text-xs leading-relaxed text-[#94a3b8]">
+        Bought as a private individual? You have a 14-day right of withdrawal.{" "}
+        <Link href="/policies/withdraw" className="font-semibold text-[#2563eb] hover:text-[#1d4ed8]">
+          Withdraw from contract here
+        </Link>
+      </p>
       <Link
         href="/outlet/components"
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2563eb] hover:text-[#1d4ed8]"

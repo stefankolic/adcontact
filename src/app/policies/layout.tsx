@@ -7,6 +7,7 @@ const policyLinks = [
   { label: "Return & Refund Policy", href: "/policies/returns" },
   { label: "Cookie Policy", href: "/policies/cookies" },
   { label: "General Terms of Delivery", href: "/policies/terms" },
+  { label: "Withdraw from contract", href: "/policies/withdraw" },
 ];
 
 export default function PoliciesLayout({ children }: { children: React.ReactNode }) {

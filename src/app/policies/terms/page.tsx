@@ -14,7 +14,15 @@ export default function TermsPage() {
       <h1 className="text-2xl font-bold text-[#0a1628] mt-4 mb-6">General Terms of Delivery</h1>
       <div className="prose prose-sm text-[#374151] leading-7 space-y-4 max-w-2xl">
         <p>
-          Our deliveries are governed by the IML 2009 standard terms. Download the full document below.
+          Our deliveries to business customers are governed by the IML 2009 standard terms. Download the full document below.
+        </p>
+        <p>
+          If you buy as a private individual through our Components Outlet checkout, mandatory consumer law applies
+          instead, including your 14-day right of withdrawal. See the{" "}
+          <Link href="/policies/returns" className="text-[#2563eb] hover:text-[#1d4ed8]">Return &amp; Refund Policy</Link>{" "}
+          and the{" "}
+          <Link href="/policies/withdraw" className="text-[#2563eb] hover:text-[#1d4ed8]">Withdraw from contract</Link>{" "}
+          function.
         </p>
       </div>
 

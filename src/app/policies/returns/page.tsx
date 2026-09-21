@@ -30,7 +30,7 @@ export default function ReturnsPolicyPage() {
           If you&apos;re a private individual (not buying for your business) and purchased through our Components Outlet checkout, EU law gives you a 14-day right of withdrawal from the day you receive the goods, for any reason, no explanation needed.
         </p>
         <p>
-          To withdraw, tell us clearly within those 14 days, email us via the Contact form, stating your order and that you wish to cancel. You then have a further 14 days to send the goods back.
+          To withdraw, use the <Link href="/policies/withdraw" className="text-[#2563eb] hover:text-[#1d4ed8]">Withdraw from contract here</Link> function within those 14 days. It confirms your withdrawal by email straight away. You then have a further 14 days to send the goods back.
         </p>
         <p>
           Return shipping is at your own cost, unless we&apos;ve agreed otherwise in writing. Once we receive the goods back (or you provide proof you&apos;ve sent them), we&apos;ll refund your payment within 14 days, using your original payment method.

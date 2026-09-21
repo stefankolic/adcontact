@@ -118,6 +118,18 @@ export async function POST(req: Request) {
     // Checkout collects the buyer's shipping address for physical fulfillment.
     shipping_address_collection: { allowed_countries: ["SE", "EE", "NO", "DK", "FI", "DE", "GB"] },
     shipping_options: SHIPPING_OPTIONS,
+    // Requires the Terms of service URL to be set in the Stripe dashboard's
+    // public details, otherwise session creation fails. Stripe records the
+    // acceptance on the session (consent.terms_of_service).
+    consent_collection: { terms_of_service: "required" },
+    custom_text: {
+      terms_of_service_acceptance: {
+        message: `I agree to the [General Terms of Delivery](${origin}/policies/terms) and the [Return & Refund Policy](${origin}/policies/returns).`,
+      },
+      submit: {
+        message: `Private individuals have a 14-day right of withdrawal. [How to withdraw](${origin}/policies/withdraw)`,
+      },
+    },
     metadata: { sku: item.sku, outletDescription: item.description },
     success_url: `${origin}/outlet/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/outlet/components`,
