@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package, Tag } from "lucide-react";
 import type { Metadata } from "next";
 import { getProductDetail, type RelatedProduct, type DrawingFile } from "@/data/deutschProductDetails";
-import { deutschProducts, seriesLabelFor, deutschSeoTitle } from "@/data/deutschConnectors";
+import { deutschProducts, seriesLabelFor, deutschSeoTitle, REFERENCE_IMAGE_PARTS } from "@/data/deutschConnectors";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
@@ -380,6 +380,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
             </div>
+            {mainImage && REFERENCE_IMAGE_PARTS.has(partNumber.toUpperCase()) && (
+              <p className="mt-2 max-w-md text-xs text-[#64748b]">
+                Reference image of a similar part. Minor details may differ from the part supplied.
+              </p>
+            )}
 
             {/* Outlet stock — under the image, matched to its width. Only shown
                 when this exact part has its own outlet listing. */}
