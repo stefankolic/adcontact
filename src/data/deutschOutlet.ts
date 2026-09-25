@@ -1,5 +1,6 @@
 import generatedItems from "./generated/deutsch-outlet.json";
 import { getUnifiedProduct } from "@/data/productLookup";
+import { OUTLET_CATALOGUE_PAGES } from "@/data/outletCatalogueLinks";
 
 /**
  * Surplus Deutsch connector stock from Adcontact's own warehouse, sold at
@@ -41,12 +42,14 @@ export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
   "247002-6072": { partNumber: "IMC 26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg" },
   "247000-6052": { partNumber: "IMC 21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg" },
   "247001-2022": { partNumber: "IMC 14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg" },
-  "243026-5006": { partNumber: "DRC26-50-S06", image: "/media/outlet-components/drc26-50-s06.jpg" },
   "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg" },
-  "240034-09": { partNumber: "0462-210-1231", image: "/media/outlet-components/0462-210-1231.jpg" },
-  "240006-01": { partNumber: "1060-14-0122", image: "/media/outlet-components/1060-14-0122.jpg" },
-  "240006-09": { partNumber: "1060-14-0144", image: "/media/outlet-components/1060-14-0144.jpg" },
 };
+
+for (const sku of Object.keys(OUTLET_OWN_PAGES)) {
+  if (OUTLET_CATALOGUE_PAGES[sku]) {
+    throw new Error(`Outlet row ${sku} has both an own page and a catalogue page; use the existing catalogue page`);
+  }
+}
 
 export function outletSlug(partNumber: string): string {
   return partNumber.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -58,6 +61,13 @@ for (const [sku, page] of Object.entries(OUTLET_OWN_PAGES)) {
   const clash = slugOwners.get(slug);
   if (clash) throw new Error(`Outlet page slug "${slug}" is used by both ${clash} and ${sku}`);
   slugOwners.set(slug, sku);
+}
+
+/** The outlet row whose part is the given Magento catalogue product, if any. */
+export function outletItemForCatalogueProduct(productId: number | string): OutletComponent | undefined {
+  const id = Number(productId);
+  const sku = Object.keys(OUTLET_CATALOGUE_PAGES).find((k) => OUTLET_CATALOGUE_PAGES[k].productId === id);
+  return sku ? deutschOutletComponents.find((item) => item.sku === sku) : undefined;
 }
 
 /** The own-page entry for an unmatched outlet row, or null. */
@@ -85,7 +95,8 @@ export function outletComponentHref(item: OutletComponent): string | null {
     return `/products/deutsch-connectors/${item.matchedPartNumber.toLowerCase()}`;
   }
   const own = outletOwnPage(item);
-  return own ? `/outlet/components/${outletSlug(own.partNumber)}` : null;
+  if (own) return `/outlet/components/${outletSlug(own.partNumber)}`;
+  return OUTLET_CATALOGUE_PAGES[item.sku]?.route ?? null;
 }
 
 // Treat Magento's "no photo"/placeholder graphic as no image, same convention
@@ -105,7 +116,9 @@ function cleanImage(path: string | null | undefined): string | null {
  *  Callers should fall back to the site's standard "No image available"
  *  treatment when this returns null. */
 export function outletComponentImageSrc(item: OutletComponent): string | null {
-  if (!item.matchedPartNumber) return outletOwnPage(item)?.image ?? null;
+  if (!item.matchedPartNumber) {
+    return outletOwnPage(item)?.image ?? OUTLET_CATALOGUE_PAGES[item.sku]?.image ?? null;
+  }
   const product = getUnifiedProduct(item.matchedPartNumber);
   return cleanImage(product?.image);
 }

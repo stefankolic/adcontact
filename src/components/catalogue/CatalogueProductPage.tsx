@@ -1,9 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Archive, Check, Clock, Download, FileImage, FileText, Mail, Package, Phone } from "lucide-react";
+import { ArrowRight, Archive, Check, Clock, Download, FileImage, FileText, Mail, Package, Phone, Tag } from "lucide-react";
 import QuoteForm from "@/components/QuoteForm";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
 import { brands } from "@/data/brands";
+import { outletItemForCatalogueProduct } from "@/data/deutschOutlet";
+import { OUTLET_CATALOGUE_PAGES } from "@/data/outletCatalogueLinks";
+import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
+import { productJsonLd } from "@/lib/productSchema";
 import { normalizeLegacyHtml, stripLegacyHtml, stripInlineStyles } from "@/lib/legacyHtml";
 import {
   catalogueProductLegacyRoute,
@@ -154,6 +159,22 @@ export default function CatalogueProductPage({
     : "Request a quote";
   const primaryImage = magentoImageSrc(product.image ?? product.gallery[0] ?? product.thumbnail);
   const title = titleForProduct(product);
+  // Only parts with their own outlet listing carry a price, a Buy button and
+  // Product schema (Google's validator rejects a Product with no offer).
+  const outlet = outletItemForCatalogueProduct(product.id);
+  const outletLink = outlet ? OUTLET_CATALOGUE_PAGES[outlet.sku] : undefined;
+  const outletLd =
+    outlet && outletLink && primaryImage
+      ? productJsonLd({
+          name: `${product.brand ?? product.manufacturer ?? "Deutsch"} ${title}`,
+          partNumber: sku,
+          brand: product.brand ?? product.manufacturer ?? "Deutsch",
+          description: `${title}, surplus outlet stock from Adcontact's own warehouse in Keila. New, EUR ${outlet.priceEur.toFixed(2)} per unit, ${outlet.quantity.toLocaleString("en-US")} in stock.`,
+          image: primaryImage,
+          url: outletLink.route,
+          offer: { priceEur: outlet.priceEur },
+        })
+      : null;
   const showSkuEyebrow = sku !== title && sku !== product.name;
   const description =
     product.description && product.description !== product.name && product.description !== product.sku
@@ -172,6 +193,9 @@ export default function CatalogueProductPage({
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      {outletLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(outletLd) }} />
+      )}
       <div className="border-b border-[#e5e7eb] bg-white">
         <div className="mx-auto max-w-[1440px] px-6 py-3">
           <Breadcrumbs
@@ -191,6 +215,7 @@ export default function CatalogueProductPage({
 
       <main className="mx-auto max-w-[1440px] px-6 py-6">
         <div className="mb-8 grid gap-8 lg:grid-cols-[minmax(300px,460px)_1fr]">
+          <div>
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white">
             {primaryImage ? (
               <Image
@@ -208,6 +233,37 @@ export default function CatalogueProductPage({
                 <span className="text-xs font-medium text-[#94a3b8]">No image available</span>
               </div>
             )}
+          </div>
+
+          {outlet && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Tag size={14} className="flex-none text-amber-700" />
+                <p className="text-sm font-bold text-amber-900">
+                  Outlet stock, €{outlet.priceEur.toFixed(2)} per unit
+                </p>
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-amber-800">
+                {outlet.quantity.toLocaleString("en-US")} in stock at our Keila warehouse, price for 1
+                to 10 pieces, while quantities last.{" "}
+                <Link
+                  href="/outlet/components"
+                  className="font-semibold text-amber-900 underline decoration-2 underline-offset-2 hover:no-underline"
+                >
+                  Browse the Components Outlet
+                </Link>
+              </p>
+              {CHECKOUT_ELIGIBLE_SKUS.has(outlet.sku) && (
+                <div className="mt-3">
+                  <BuyOutletButton
+                    sku={outlet.sku}
+                    maxQuantity={Math.min(outlet.quantity, 99)}
+                    className="rounded-md bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-600 disabled:opacity-60"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           </div>
 
           <div className="flex min-w-0 flex-col">
