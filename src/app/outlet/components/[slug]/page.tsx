@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronRight, Mail, Package, Tag } from "lucide-react";
+import { ChevronRight, Mail, Package } from "lucide-react";
 import type { Metadata } from "next";
 import { OUTLET_OWN_PAGES, outletItemBySlug, outletOwnPage, outletSlug } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
-import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
+import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
+import { outletSoldOut, outletStock } from "@/data/outletStock";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/productSchema";
 
 export function generateStaticParams() {
@@ -13,7 +14,10 @@ export function generateStaticParams() {
 }
 
 function describe(partNumber: string, priceEur: number, quantity: number): string {
-  return `Deutsch ${partNumber}, surplus outlet stock from Adcontact's own warehouse in Keila. New, EUR ${priceEur.toFixed(2)} per unit, ${quantity.toLocaleString("en-US")} in stock. Buy online or ask for volume pricing.`;
+  const base = `Deutsch ${partNumber}, surplus outlet stock from Adcontact's own warehouse in Keila. New, EUR ${priceEur.toFixed(2)} per unit`;
+  return quantity > 0
+    ? `${base}, ${quantity.toLocaleString("en-US")} in stock. Buy online or ask for volume pricing.`
+    : `${base}. Currently sold out, ask us whether we can source more.`;
 }
 
 function lookup(slug: string) {
@@ -29,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { item, page } = found;
   return {
     title: `Deutsch ${page.partNumber}, Outlet Surplus Stock`,
-    description: describe(page.partNumber, item.priceEur, item.quantity),
+    description: describe(page.partNumber, item.priceEur, outletStock(item)),
     alternates: { canonical: `/outlet/components/${slug}` },
   };
 }
@@ -46,10 +50,10 @@ export default async function OutletComponentPage({ params }: { params: Promise<
     partNumber: page.partNumber,
     brand: "Deutsch",
     category: "Hardware > Power & Electrical Supplies > Wire Terminals & Connectors",
-    description: describe(page.partNumber, item.priceEur, item.quantity),
+    description: describe(page.partNumber, item.priceEur, outletStock(item)),
     image: page.image,
     url: pagePath,
-    offer: { priceEur: item.priceEur },
+    offer: { priceEur: item.priceEur, inStock: !outletSoldOut(item) },
   });
   const breadcrumbLd = breadcrumbJsonLd([
     { name: "Home", url: "/" },
@@ -69,7 +73,7 @@ export default async function OutletComponentPage({ params }: { params: Promise<
     { label: "Brand", value: "Deutsch" },
     { label: "Condition", value: "New, surplus stock" },
     { label: "Our stock code", value: item.sku },
-    { label: "In stock", value: item.quantity.toLocaleString("en-US") },
+    { label: "In stock", value: outletSoldOut(item) ? "Sold out" : outletStock(item).toLocaleString("en-US") },
     { label: "Location", value: "Keila, Estonia" },
   ];
 
@@ -135,36 +139,22 @@ export default async function OutletComponentPage({ params }: { params: Promise<
               Surplus stock from our own warehouse, sold at outlet pricing while quantities last.
             </p>
 
-            <div className="max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Tag size={14} className="flex-none text-amber-700" />
-                <p className="text-sm font-bold text-amber-900">
-                  Outlet stock, €{item.priceEur.toFixed(2)} per unit
-                </p>
-              </div>
-              <p className="mt-1 text-xs leading-relaxed text-amber-800">
-                {item.quantity.toLocaleString("en-US")} in stock at our Keila warehouse, price for 1
-                to 10 pieces, while quantities last.
-              </p>
-              {CHECKOUT_ELIGIBLE_SKUS.has(item.sku) && (
-                <div className="mt-3">
-                  <BuyOutletButton
-                    sku={item.sku}
-                    maxQuantity={Math.min(item.quantity, 99)}
-                    className="rounded-md bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-600 disabled:opacity-60"
-                  />
-                </div>
-              )}
-            </div>
+            <OutletStockBlock
+              item={item}
+              canBuy={CHECKOUT_ELIGIBLE_SKUS.has(item.sku)}
+              className="max-w-md"
+            />
 
-            <p className="mt-4 max-w-md text-sm leading-6 text-[#475569]">
-              Need more than 10 pieces? Where we hold enough stock we can often match or beat other
-              distributors&apos; bulk pricing.{" "}
-              <a href={enquiryHref} className="inline-flex items-center gap-1 font-semibold text-[#2563eb] hover:text-[#1d4ed8]">
-                <Mail size={13} />
-                Ask us for a price
-              </a>
-            </p>
+            {!outletSoldOut(item) && (
+              <p className="mt-4 max-w-md text-sm leading-6 text-[#475569]">
+                Need more than 10 pieces? Where we hold enough stock we can often match or beat other
+                distributors&apos; bulk pricing.{" "}
+                <a href={enquiryHref} className="inline-flex items-center gap-1 font-semibold text-[#2563eb] hover:text-[#1d4ed8]">
+                  <Mail size={13} />
+                  Ask us for a price
+                </a>
+              </p>
+            )}
 
             <dl className="mt-8 grid max-w-md grid-cols-2 gap-3">
               {facts.map((f) => (

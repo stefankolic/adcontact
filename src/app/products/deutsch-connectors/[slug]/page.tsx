@@ -1,13 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package, Tag } from "lucide-react";
+import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package } from "lucide-react";
 import type { Metadata } from "next";
 import { getProductDetail, type RelatedProduct, type DrawingFile } from "@/data/deutschProductDetails";
 import { deutschProducts, seriesLabelFor, deutschSeoTitle, REFERENCE_IMAGE_PARTS } from "@/data/deutschConnectors";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
-import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
+import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
+import { outletSoldOut } from "@/data/outletStock";
 import { brands } from "@/data/brands";
 import {
   findCatalogueProductByReference,
@@ -313,7 +314,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     image: mainImage,
     url: pagePath,
     // Only the parts with real outlet stock carry a visible price on the page.
-    offer: outletListing ? { priceEur: outletListing.priceEur } : undefined,
+    offer: outletListing ? { priceEur: outletListing.priceEur, inStock: !outletSoldOut(outletListing) } : undefined,
   });
   const breadcrumbLd = breadcrumbJsonLd([
     { name: "Home", url: "/" },
@@ -389,33 +390,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {/* Outlet stock — under the image, matched to its width. Only shown
                 when this exact part has its own outlet listing. */}
             {outletListing && (
-              <div className="mt-4 max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Tag size={14} className="flex-none text-amber-700" />
-                  <p className="text-sm font-bold text-amber-900">
-                    Outlet stock, €{outletListing.priceEur.toFixed(2)} per unit
-                  </p>
-                </div>
-                <p className="mt-1 text-xs leading-relaxed text-amber-800">
-                  {outletListing.quantity.toLocaleString()} in stock at our Keila warehouse, price
-                  for 1 to 10 pieces, while quantities last.{" "}
-                  <Link
-                    href="/outlet/components"
-                    className="font-semibold text-amber-900 underline decoration-2 underline-offset-2 hover:no-underline"
-                  >
-                    Browse the Components Outlet
-                  </Link>
-                </p>
-                {CHECKOUT_ELIGIBLE_SKUS.has(outletListing.sku) && (
-                  <div className="mt-3">
-                    <BuyOutletButton
-                      sku={outletListing.sku}
-                      maxQuantity={Math.min(outletListing.quantity, 99)}
-                      className="rounded-md bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-600 disabled:opacity-60"
-                    />
-                  </div>
-                )}
-              </div>
+              <OutletStockBlock
+                item={outletListing}
+                canBuy={CHECKOUT_ELIGIBLE_SKUS.has(outletListing.sku)}
+                className="mt-4 max-w-md"
+              />
             )}
           </div>
 

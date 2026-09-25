@@ -11,9 +11,15 @@ import {
 } from "@/data/deutschOutlet";
 import { deutschSeoTitleByPartNumber } from "@/data/deutschConnectors";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
+import { outletSoldOut, outletStock } from "@/data/outletStock";
 import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
 
 const PAGE_SIZE = 50;
+
+// Sold-out rows stay listed (their pages stay indexable) but sink to the bottom.
+const ORDERED = [...deutschOutletComponents].sort(
+  (a, b) => Number(outletSoldOut(a)) - Number(outletSoldOut(b)),
+);
 
 export default function OutletComponentsClient() {
   const [search, setSearch] = useState("");
@@ -21,8 +27,8 @@ export default function OutletComponentsClient() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return deutschOutletComponents;
-    return deutschOutletComponents.filter(
+    if (!q) return ORDERED;
+    return ORDERED.filter(
       (item) =>
         item.sku.toLowerCase().includes(q) || item.description.toLowerCase().includes(q)
     );
@@ -91,6 +97,7 @@ export default function OutletComponentsClient() {
             {shown.map((item) => {
               const href = outletComponentHref(item);
               const imageSrc = outletComponentImageSrc(item);
+              const soldOut = outletSoldOut(item);
               // Keeps the visible cell compact (a dense SKU table, not a
               // place for a full sentence) while still giving crawlers and
               // screen readers a fully descriptive, keyword-rich accessible
@@ -102,7 +109,7 @@ export default function OutletComponentsClient() {
               return (
                 <tr
                   key={item.sku}
-                  className="odd:bg-white even:bg-[#f8fafc] hover:bg-[#f1f5f9] transition-colors"
+                  className={`odd:bg-white even:bg-[#f8fafc] hover:bg-[#f1f5f9] transition-colors ${soldOut ? "opacity-60" : ""}`}
                 >
                   <td className="px-4 py-3">
                     <div className="relative h-10 w-10 overflow-hidden rounded-md border border-[#e2e8f0] bg-[#f8fafc]">
@@ -139,16 +146,22 @@ export default function OutletComponentsClient() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right text-[#374151]">
-                    {item.quantity.toLocaleString()}
+                    {soldOut ? (
+                      <span className="text-xs font-semibold uppercase tracking-wider text-[#64748b]">Sold out</span>
+                    ) : (
+                      outletStock(item).toLocaleString()
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-[#0a1628]">
                     €{item.priceEur.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {CHECKOUT_ELIGIBLE_SKUS.has(item.sku) ? (
+                    {soldOut ? (
+                      <span className="text-xs font-semibold text-[#94a3b8]">Sold out</span>
+                    ) : CHECKOUT_ELIGIBLE_SKUS.has(item.sku) ? (
                       <BuyOutletButton
                         sku={item.sku}
-                        maxQuantity={Math.min(item.quantity, 99)}
+                        maxQuantity={Math.min(outletStock(item), 99)}
                         className="rounded-md bg-[#f59e0b] px-3 py-1.5 text-xs font-semibold text-[#0a1628] transition-colors hover:bg-[#d97706] disabled:opacity-60"
                       />
                     ) : (

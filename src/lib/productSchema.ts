@@ -48,7 +48,7 @@ type ProductSchemaInput = {
    * outlet items). Quote-only parts get Product schema with no `offers` — an
    * offer without a price is malformed, and there's no price to show anyway.
    */
-  offer?: { priceEur: number };
+  offer?: { priceEur: number; inStock?: boolean };
 };
 
 export function productJsonLd(p: ProductSchemaInput) {
@@ -75,7 +75,7 @@ export function productJsonLd(p: ProductSchemaInput) {
             url: absoluteUrl(p.url),
             priceCurrency: "EUR",
             price: p.offer.priceEur.toFixed(2),
-            availability: "https://schema.org/InStock",
+            availability: p.offer.inStock === false ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
             itemCondition: "https://schema.org/NewCondition",
             seller: { "@type": "Organization", name: "Adcontact AB" },
           },

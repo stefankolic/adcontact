@@ -1,24 +1,19 @@
 # Builds the next Merchant Center feed workbook from the previous one plus the current outlet data.
+# 0) node --env-file=.env.local scripts/outlet/sync-stock.mjs   (refresh the live stock snapshot first)
 # 1) npx tsx scripts/outlet/dump-feed-data.ts feed-data.json
-# 2) node --env-file=.env.local scripts/outlet/dump-stock.mjs stock.json   (live stock from the database)
-# 3) python scripts/outlet/build-merchant-feed.py <previous.xlsx> feed-data.json <new.xlsx> [stock.json]
+# 2) python scripts/outlet/build-merchant-feed.py <previous.xlsx> feed-data.json <new.xlsx>
 # Existing rows keep their text (titles are Stefan's); only price, link, image, availability and the
-# reference quantity are refreshed. Rows for newly eligible outlet SKUs are appended. With stock.json
-# the quantity is the live stock (quantity_remaining), and a row at zero becomes "out of stock".
-# Requires openpyxl.
+# reference quantity are refreshed. Rows for newly eligible outlet SKUs are appended. Quantity is the
+# live stock (quantity_remaining) and a row at zero becomes "out of stock". Requires openpyxl.
 import copy, csv, json, re, sys
 from openpyxl import load_workbook
 
 prev_path, data_path, out_path = sys.argv[1:4]
-stock = json.load(open(sys.argv[4])) if len(sys.argv) > 4 else {}
 TAIL = "Surplus stock from Adcontact's own warehouse, sold at outlet pricing while quantities last."
 CATEGORY_NOUN = {"Accessories": "Accessory", "Contacts": "Contact", "Tools": "Tool", "Connectors": "Connector"}
 CONNECTOR_PREFIXES = ("IMC", "WT ", "DT 16", "HDP24", "8N1534")
 
 data = json.load(open(data_path, encoding="utf8"))
-for _r in data:
-    if _r["sku"] in stock:
-        _r["quantity"] = stock[_r["sku"]]
 wb = load_workbook(prev_path)
 ws = wb.worksheets[0]
 header = [c.value for c in ws[1]]

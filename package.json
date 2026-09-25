@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/outlet/sync-stock.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "crawl:deutsch": "node scripts/crawlers/crawl-deutsch-products.mjs",

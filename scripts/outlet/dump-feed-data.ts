@@ -1,4 +1,5 @@
 // Dumps every Merchant-Center-eligible outlet row (real page + real image) as JSON.
+// Quantity is the live stock snapshot, so run scripts/outlet/sync-stock.mjs first.
 // Run from the repo root: npx tsx scripts/outlet/dump-feed-data.ts <out.json>
 import { writeFileSync } from "node:fs";
 import {
@@ -8,6 +9,7 @@ import {
   OUTLET_OWN_PAGES,
 } from "../../src/data/deutschOutlet";
 import { OUTLET_CATALOGUE_PAGES } from "../../src/data/outletCatalogueLinks";
+import { outletStock } from "../../src/data/outletStock";
 import { deutschSeoTitleByPartNumber, REFERENCE_IMAGE_PARTS } from "../../src/data/deutschConnectors";
 import { findCatalogueProductByReference, getProductBreadcrumbs } from "../../src/lib/magentoCatalogue";
 
@@ -51,7 +53,7 @@ const rows = deutschOutletComponents.flatMap((item) => {
     categoryName,
     catalogueName,
     reference,
-    quantity: item.quantity,
+    quantity: outletStock(item),
     priceEur: item.priceEur,
     link: SITE + href,
     imageLink: SITE + image.split("?")[0],
