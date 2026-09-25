@@ -35,7 +35,11 @@ export const deutschOutletComponents = generatedItems as OutletComponent[];
  *  `/media/...` path of the photo in R2. */
 export type OutletOwnPage = { partNumber: string; image: string };
 
-export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {};
+export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
+  "247002-2003": { partNumber: "IMC 16-2003X", image: "/media/outlet-components/imc-16-2003x.jpg" },
+  "247000-2002": { partNumber: "IMC 11-2002X", image: "/media/outlet-components/imc-11-2002x.jpg" },
+  "247002-6072": { partNumber: "IMC 26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg" },
+};
 
 export function outletSlug(partNumber: string): string {
   return partNumber.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");

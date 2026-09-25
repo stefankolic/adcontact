@@ -20,6 +20,10 @@ const DEUTSCH_IMAGE_OVERRIDES: Record<string, string> = {
   // Center's 500x500 minimum). The homepage featured-products strip still
   // uses the old small webp; that's a separate, lower-stakes context.
   "HDP24-24-18SE-L017": "/media/outlet-components/hdp24-24-18se-l017.jpg",
+  // 2026-09-25: photos Stefan sourced for outlet rows whose catalogue entry
+  // only had the no_photo placeholder (both 500x500, above the GMC minimum).
+  "DTM06-12SA-EE04": "/media/outlet-components/dtm06-12sa-ee04.jpg",
+  "HDP26-24-18PE-L017": "/media/outlet-components/hdp26-24-18pe-l017.jpg",
 };
 
 export const deutschProducts = (
