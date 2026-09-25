@@ -113,6 +113,11 @@ export default async function OutletComponentPage({ params }: { params: Promise<
                 </div>
               )}
             </div>
+            {page.reference && (
+              <p className="mt-2 max-w-md text-xs text-[#64748b]">
+                Reference image of a similar part. Minor details may differ from the part supplied.
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col">

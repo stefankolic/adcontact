@@ -34,7 +34,13 @@ export const deutschOutletComponents = generatedItems as OutletComponent[];
  *  `sku`. `partNumber` is the clean manufacturer part number shown on the
  *  page (the sheet's own `description` is inconsistent), `image` is the
  *  `/media/...` path of the photo in R2. */
-export type OutletOwnPage = { partNumber: string; image: string };
+export type OutletOwnPage = {
+  partNumber: string;
+  image: string;
+  /** True when the photo shows a similar variant, not this exact part; the
+   *  page then labels it "Reference image". */
+  reference?: boolean;
+};
 
 export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
   "247002-2003": { partNumber: "IMC 16-2003X", image: "/media/outlet-components/imc-16-2003x.jpg" },
@@ -43,6 +49,9 @@ export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
   "247000-6052": { partNumber: "IMC 21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg" },
   "247001-2022": { partNumber: "IMC 14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg" },
   "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg" },
+  "246020-016": { partNumber: "WT 06B-20-16 SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg" },
+  // Same photo as the 20-16; the part number suggests a larger shell with more cavities (24-31), so it is labelled a reference image.
+  "246024-031": { partNumber: "WT 06B-24-31 SN", image: "/media/outlet-components/wt-06b-24-31-sn.jpg", reference: true },
 };
 
 for (const sku of Object.keys(OUTLET_OWN_PAGES)) {
