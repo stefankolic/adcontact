@@ -44,6 +44,8 @@ export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
   "243026-5006": { partNumber: "DRC26-50-S06", image: "/media/outlet-components/drc26-50-s06.jpg" },
   "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg" },
   "240034-09": { partNumber: "0462-210-1231", image: "/media/outlet-components/0462-210-1231.jpg" },
+  "240006-01": { partNumber: "1060-14-0122", image: "/media/outlet-components/1060-14-0122.jpg" },
+  "240006-09": { partNumber: "1060-14-0144", image: "/media/outlet-components/1060-14-0144.jpg" },
 };
 
 export function outletSlug(partNumber: string): string {
