@@ -39,6 +39,11 @@ export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
   "247002-2003": { partNumber: "IMC 16-2003X", image: "/media/outlet-components/imc-16-2003x.jpg" },
   "247000-2002": { partNumber: "IMC 11-2002X", image: "/media/outlet-components/imc-11-2002x.jpg" },
   "247002-6072": { partNumber: "IMC 26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg" },
+  "247000-6052": { partNumber: "IMC 21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg" },
+  "247001-2022": { partNumber: "IMC 14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg" },
+  "243026-5006": { partNumber: "DRC26-50-S06", image: "/media/outlet-components/drc26-50-s06.jpg" },
+  "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg" },
+  "240034-09": { partNumber: "0462-210-1231", image: "/media/outlet-components/0462-210-1231.jpg" },
 };
 
 export function outletSlug(partNumber: string): string {
