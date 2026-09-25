@@ -49,6 +49,10 @@ export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
   "247000-6052": { partNumber: "IMC 21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg" },
   "247001-2022": { partNumber: "IMC 14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg" },
   "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg" },
+  "242016-460": { partNumber: "DT 16-6SB KP01", image: "/media/outlet-components/dt-16-6sb-kp01.jpg" },
+  "244130-01": { partNumber: "0428-204-1890", image: "/media/outlet-components/0428-204-1890.jpg" },
+  // Reference image: the HDP24-18-14PE-L024 catalogue photo (same 14-way HDP24 family), padded to 640x640.
+  "244026-0114": { partNumber: "HDP24-24-14PE", image: "/media/outlet-components/hdp24-24-14pe.jpg", reference: true },
   "246020-016": { partNumber: "WT 06B-20-16 SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg" },
   // Same photo as the 20-16; the part number suggests a larger shell with more cavities (24-31), so it is labelled a reference image.
   "246024-031": { partNumber: "WT 06B-24-31 SN", image: "/media/outlet-components/wt-06b-24-31-sn.jpg", reference: true },
