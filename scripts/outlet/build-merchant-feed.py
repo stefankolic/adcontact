@@ -1,17 +1,24 @@
 # Builds the next Merchant Center feed workbook from the previous one plus the current outlet data.
 # 1) npx tsx scripts/outlet/dump-feed-data.ts feed-data.json
-# 2) python scripts/outlet/build-merchant-feed.py <previous.xlsx> feed-data.json <new.xlsx>
-# Existing rows keep their text (titles are Stefan's); only price, link, image and the reference
-# quantity are refreshed. Rows for newly eligible outlet SKUs are appended. Requires openpyxl.
+# 2) node --env-file=.env.local scripts/outlet/dump-stock.mjs stock.json   (live stock from the database)
+# 3) python scripts/outlet/build-merchant-feed.py <previous.xlsx> feed-data.json <new.xlsx> [stock.json]
+# Existing rows keep their text (titles are Stefan's); only price, link, image, availability and the
+# reference quantity are refreshed. Rows for newly eligible outlet SKUs are appended. With stock.json
+# the quantity is the live stock (quantity_remaining), and a row at zero becomes "out of stock".
+# Requires openpyxl.
 import copy, csv, json, re, sys
 from openpyxl import load_workbook
 
 prev_path, data_path, out_path = sys.argv[1:4]
+stock = json.load(open(sys.argv[4])) if len(sys.argv) > 4 else {}
 TAIL = "Surplus stock from Adcontact's own warehouse, sold at outlet pricing while quantities last."
 CATEGORY_NOUN = {"Accessories": "Accessory", "Contacts": "Contact", "Tools": "Tool", "Connectors": "Connector"}
 CONNECTOR_PREFIXES = ("IMC", "WT ", "DT 16", "HDP24", "8N1534")
 
 data = json.load(open(data_path, encoding="utf8"))
+for _r in data:
+    if _r["sku"] in stock:
+        _r["quantity"] = stock[_r["sku"]]
 wb = load_workbook(prev_path)
 ws = wb.worksheets[0]
 header = [c.value for c in ws[1]]
@@ -61,7 +68,7 @@ def new_row(r):
     if r["reference"]:
         desc += " Image shows a similar part."
     return {"id": r["sku"], "title": title, "description": desc, "link": r["link"], "image_link": r["imageLink"],
-            "availability": "in stock", "price": f"{r['priceEur']:.2f} EUR", "condition": "new", "brand": "Deutsch",
+            "availability": "in stock" if r["quantity"] > 0 else "out of stock", "price": f"{r['priceEur']:.2f} EUR", "condition": "new", "brand": "Deutsch",
             "mpn": mpn, "qty_available_reference_only": r["quantity"]}
 
 by_id = {r["sku"]: r for r in data}
@@ -73,7 +80,8 @@ for row in ws.iter_rows(min_row=2):
     r = by_id.get(rid)
     if r is None:
         drift.append((rid, "no longer eligible")); continue
-    want = {"price": f"{r['priceEur']:.2f} EUR", "link": r["link"], "image_link": r["imageLink"], "qty_available_reference_only": r["quantity"]}
+    want = {"price": f"{r['priceEur']:.2f} EUR", "link": r["link"], "image_link": r["imageLink"], "qty_available_reference_only": r["quantity"],
+            "availability": "in stock" if r["quantity"] > 0 else "out of stock"}
     for k, v in want.items():
         cell = row[col[k]]
         if str(cell.value) != str(v):
