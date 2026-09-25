@@ -22,3 +22,6 @@ webhook; the steps below are for stock that leaves or is corrected outside the w
 
 `.env.local` (git-ignored) holds `DATABASE_URL`; refresh it with `vercel env pull`. If the database is
 unreachable during a build, the last committed snapshot in `src/data/generated/outlet-stock.json` is used.
+Vercel PREVIEW builds skip the sync on purpose (the Neon integration gives every preview its own stale database
+branch) and use the committed snapshot; only production builds read the real database. Before merging a branch,
+run `sync-stock.mjs` locally and commit the snapshot.

@@ -2,6 +2,8 @@
 // Runs before every build (see package.json) so a redeploy picks up the current stock, and by hand:
 //   node --env-file=.env.local scripts/outlet/sync-stock.mjs
 // Never fails a build: without DATABASE_URL, or if the query fails, the existing snapshot is kept.
+// Vercel preview builds are skipped: the Neon integration gives each preview its own database branch,
+// a stale copy of production, so previews use the committed snapshot instead.
 import { neon } from "@neondatabase/serverless";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -9,6 +11,10 @@ import { join } from "node:path";
 const file = join(process.cwd(), "src/data/generated/outlet-stock.json");
 
 export async function syncStock() {
+  if (process.env.VERCEL_ENV === "preview") {
+    console.log("[outlet-stock] preview build: skipping the sync (its database is a stale branch), using the committed snapshot");
+    return null;
+  }
   if (!process.env.DATABASE_URL) {
     console.warn("[outlet-stock] DATABASE_URL not set, keeping the existing snapshot");
     return null;
