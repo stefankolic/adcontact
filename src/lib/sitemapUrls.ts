@@ -5,6 +5,7 @@ import {
   PRODUCT_CANONICAL_ROUTES,
 } from "@/lib/magentoCatalogue";
 import { deutschProducts } from "@/data/deutschConnectors";
+import { OUTLET_OWN_PAGES, outletSlug } from "@/data/deutschOutlet";
 import { resources } from "@/data/resources";
 import { brands } from "@/data/brands";
 import { usedMachines } from "@/data/usedMachines";
@@ -118,6 +119,9 @@ export function getAllSitemapEntries(): SitemapEntry[] {
   for (const b of brands) add({ path: `/brands/${b.slug}`, priority: 0.5, changeFrequency: "monthly" });
   for (const m of usedMachines) {
     add({ path: `/outlet/used-machines/${m.slug}`, priority: 0.5, changeFrequency: "weekly" });
+  }
+  for (const page of Object.values(OUTLET_OWN_PAGES)) {
+    add({ path: `/outlet/components/${outletSlug(page.partNumber)}`, priority: 0.5, changeFrequency: "weekly" });
   }
 
   for (const [path, route] of Object.entries(routes)) {
