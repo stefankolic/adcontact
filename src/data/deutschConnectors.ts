@@ -1,4 +1,5 @@
 import generatedProducts from "./generated/deutsch-products.json";
+import { DEUTSCH_SERIES_OVERRIDES } from "./deutschSeriesOverrides";
 
 export interface DeutschProduct {
   partNumber: string;
@@ -20,7 +21,23 @@ const DEUTSCH_IMAGE_OVERRIDES: Record<string, string> = {
   // Center's 500x500 minimum). The homepage featured-products strip still
   // uses the old small webp; that's a separate, lower-stakes context.
   "HDP24-24-18SE-L017": "/media/outlet-components/hdp24-24-18se-l017.jpg",
+  // 2026-09-25: photos Stefan sourced for outlet rows whose catalogue entry
+  // only had the no_photo placeholder (both 500x500, above the GMC minimum).
+  "DTM06-12SA-EE04": "/media/outlet-components/dtm06-12sa-ee04.jpg",
+  "HDP26-24-18PE-L017": "/media/outlet-components/hdp26-24-18pe-l017.jpg",
+  // Reference image: the DT06-6S-EP11 photo (same 6-way DT06 socket family),
+  // white-padded 640x480 to 640x640 to clear the 500x500 minimum.
+  "DT06-6S-CE13": "/media/outlet-components/dt06-6s-ce13.jpg",
+  // 2026-09-26: photo Stefan sourced for an AMPSEAL header that showed no image (800x800, framed);
+  // catalogue photos mirror the Magento path in R2 (catalog/product/7/7/).
+  "776262-2": "/media/catalog/product/7/7/776262-2.jpg",
 };
+
+/** Parts whose photo shows a similar variant, not the exact part. The product
+ *  page labels these "Reference image" (Google requires the image to match the
+ *  product, so only use this where the difference is cosmetic, never for the
+ *  defining spec such as cavity count). Keyed by uppercase part number. */
+export const REFERENCE_IMAGE_PARTS: ReadonlySet<string> = new Set(["DT06-6S-CE13"]);
 
 export const deutschProducts = (
   generatedProducts as unknown as DeutschProduct[]
@@ -56,6 +73,15 @@ export function seriesLabelFor(series: string): string {
   return SERIES_LABELS[series] ?? `${series} Series`;
 }
 
+/** The series label shown for a product: the series from its Technical
+ *  Specifications where the dataset's series code is known to be wrong
+ *  (AMPSEAL parts are stored as "DT", see deutschSeriesOverrides.ts), else the
+ *  label for the code. Use this, not `seriesLabelFor(product.series)`, for any
+ *  title, description or badge, so the text always agrees with the specs. */
+export function seriesLabelForProduct(product: { partNumber: string; series: string }): string {
+  return DEUTSCH_SERIES_OVERRIDES[product.partNumber.toUpperCase()] ?? seriesLabelFor(product.series);
+}
+
 /**
  * The SEO title format shared by the product page H1, its JSON-LD `name`,
  * search-result snippets, and the Google Merchant Center feed (2026-09-12,
@@ -67,7 +93,7 @@ export function seriesLabelFor(series: string): string {
  * entries, not just the outlet-priced ones.
  */
 export function deutschSeoTitle(product: DeutschProduct): string {
-  const series = seriesLabelFor(product.series);
+  const series = seriesLabelForProduct(product);
   const wayType = product.ways && product.type ? `, ${product.ways}-Way ${product.type}` : "";
   return `Deutsch ${product.partNumber}, ${series}${wayType}, connector, for wire processing`;
 }

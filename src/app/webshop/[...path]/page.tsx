@@ -23,6 +23,9 @@ import { getStockoMachineGroupByCategoryRoute } from "@/data/stockoTerminatingTe
 // Stocko categories with no Magento products: route to dedicated scraped pages.
 const STOCKO_CONNECTOR_SYSTEMS_CATEGORY_ID = 125;
 const STOCKO_TERMINATING_TECHNOLOGY_CATEGORY_ID = 171;
+import { outletItemForCatalogueProduct } from "@/data/deutschOutlet";
+import { outletSeo } from "@/data/outletSeo";
+import { deutschCatalogueSeo } from "@/data/catalogueTitles";
 import {
   absoluteUrl,
   categoryMetaDescription,
@@ -77,8 +80,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     );
     if (isDeutsch) return {};
 
-    const title = productTitle(product);
-    const description = productMetaDescription(product);
+    // Outlet items on catalogue pages use the outlet SEO title and description,
+    // the same text as the page H1 and the Merchant feed.
+    const outletItem = outletItemForCatalogueProduct(product.id);
+    const outletText = outletItem ? outletSeo(outletItem) : null;
+    const title = outletText?.title ?? productTitle(product);
+    const description =
+      outletText?.description ?? (outletItem ? null : deutschCatalogueSeo(product)?.description) ?? productMetaDescription(product);
     return {
       title,
       description,

@@ -38,6 +38,12 @@ export type SeriesSummary = {
 
 const imageByPart = new Map(deutschProducts.map((p) => [p.partNumber, p.imageUrl]));
 
+// Representative photo for a series card. Wins over the first product photo of the
+// series, which is only a fallback. Keyed by the series label; files live in R2.
+const SERIES_IMAGE_OVERRIDES: Record<string, string> = {
+  "AMPSEAL Series": "/media/series/ampseal-series.jpg",
+};
+
 export const seriesSummaries: SeriesSummary[] = (() => {
   const seriesGroup = data.attributes.find((a) => a.name === "Series");
   const byseries = new Map<
@@ -67,7 +73,7 @@ export const seriesSummaries: SeriesSummary[] = (() => {
       return {
         label: o.label,
         count: o.count,
-        image: e?.image ?? null,
+        image: SERIES_IMAGE_OVERRIDES[o.label] ?? e?.image ?? null,
         minCav: e && e.cavs.length ? Math.min(...e.cavs) : null,
         maxCav: e && e.cavs.length ? Math.max(...e.cavs) : null,
         styles: e ? Array.from(e.styles).sort() : [],

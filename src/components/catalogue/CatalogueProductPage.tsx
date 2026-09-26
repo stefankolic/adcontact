@@ -3,7 +3,15 @@ import Link from "next/link";
 import { ArrowRight, Archive, Check, Clock, Download, FileImage, FileText, Mail, Package, Phone } from "lucide-react";
 import QuoteForm from "@/components/QuoteForm";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
 import { brands } from "@/data/brands";
+import { outletItemForCatalogueProduct } from "@/data/deutschOutlet";
+import { OUTLET_CATALOGUE_PAGES } from "@/data/outletCatalogueLinks";
+import { outletSoldOut } from "@/data/outletStock";
+import { outletSeo } from "@/data/outletSeo";
+import { deutschCatalogueSeo } from "@/data/catalogueTitles";
+import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
+import { productJsonLd } from "@/lib/productSchema";
 import { normalizeLegacyHtml, stripLegacyHtml, stripInlineStyles } from "@/lib/legacyHtml";
 import {
   catalogueProductLegacyRoute,
@@ -153,7 +161,27 @@ export default function CatalogueProductPage({
     ? "Request full specification and a quote"
     : "Request a quote";
   const primaryImage = magentoImageSrc(product.image ?? product.gallery[0] ?? product.thumbnail);
-  const title = titleForProduct(product);
+  // Only parts with their own outlet listing carry a price, a Buy button and
+  // Product schema (Google's validator rejects a Product with no offer). Their
+  // H1 and schema name are the outlet SEO title, the same text the Merchant feed uses.
+  const outlet = outletItemForCatalogueProduct(product.id);
+  const outletLink = outlet ? OUTLET_CATALOGUE_PAGES[outlet.sku] : undefined;
+  const outletSeoData = outlet ? outletSeo(outlet) : null;
+  // Regular Deutsch contact, accessory and tool pages get a spec-based heading too; without facts the bare part number stays.
+  const generalSeo = outlet ? null : deutschCatalogueSeo(product);
+  const title = outletSeoData?.title ?? generalSeo?.title ?? titleForProduct(product);
+  const outletLd =
+    outlet && outletLink && primaryImage
+      ? productJsonLd({
+          name: outletSeoData?.title ?? `${product.brand ?? product.manufacturer ?? "Deutsch"} ${title}`,
+          partNumber: sku,
+          brand: product.brand ?? product.manufacturer ?? "Deutsch",
+          description: outletSeoData?.description ?? `${title}, surplus outlet stock from Adcontact's own warehouse in Keila.`,
+          image: primaryImage,
+          url: outletLink.route,
+          offer: { priceEur: outlet.priceEur, inStock: !outletSoldOut(outlet) },
+        })
+      : null;
   const showSkuEyebrow = sku !== title && sku !== product.name;
   const description =
     product.description && product.description !== product.name && product.description !== product.sku
@@ -172,6 +200,9 @@ export default function CatalogueProductPage({
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      {outletLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(outletLd) }} />
+      )}
       <div className="border-b border-[#e5e7eb] bg-white">
         <div className="mx-auto max-w-[1440px] px-6 py-3">
           <Breadcrumbs
@@ -191,6 +222,7 @@ export default function CatalogueProductPage({
 
       <main className="mx-auto max-w-[1440px] px-6 py-6">
         <div className="mb-8 grid gap-8 lg:grid-cols-[minmax(300px,460px)_1fr]">
+          <div>
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white">
             {primaryImage ? (
               <Image
@@ -208,6 +240,15 @@ export default function CatalogueProductPage({
                 <span className="text-xs font-medium text-[#94a3b8]">No image available</span>
               </div>
             )}
+          </div>
+
+          {outlet && (
+            <OutletStockBlock
+              item={outlet}
+              canBuy={CHECKOUT_ELIGIBLE_SKUS.has(outlet.sku)}
+              className="mt-4"
+            />
+          )}
           </div>
 
           <div className="flex min-w-0 flex-col">

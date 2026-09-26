@@ -262,6 +262,7 @@ const ULTRASEAL20_ROUTE =
   "/webshop/production-equipment/ultrasonic-welding/branson-ultraseal20-metal-tube-sealer.html";
 const CRIMP = "/webshop/production-equipment/crimping-equipment";
 const WEZAG_ROUTE = `${CRIMP}/wezag.html`;
+const DEUTSCH_HUB_ROUTE = "/products/deutsch-connectors";
 const WZ_30_ROUTE = `${CRIMP}/wezag/handtang-wz-30.html`;
 const WZ_100_ROUTE = `${CRIMP}/wezag/handtang-wz-100.html`;
 const WZ_130_ROUTE = `${CRIMP}/wezag/presshuvud-wz-130.html`;
@@ -304,6 +305,11 @@ export const CATEGORY_CANONICAL_ROUTES: Record<number, string> = {
   // but still resolving by direct URL. Redirect both to that landing.
   105: "/products/zoller-frohlich/wire-processing", // old Stripping Machines > Z&F grid (6 products)
   109: "/products/zoller-frohlich/wire-processing", // old Crimping equipment > Z&F grid (27 products)
+  // The rich Deutsch hub is the single Deutsch landing page. Both legacy Magento
+  // pages (the category and its "Connectors" subcategory) 301 to it; Accessories,
+  // Contacts and Tools (121-123) stay as catalogue pages and link back to it.
+  86: DEUTSCH_HUB_ROUTE, // Deutsch Connectors category
+  120: DEUTSCH_HUB_ROUTE, // Deutsch > Connectors subcategory (1,794 parts)
 };
 
 type ProductOverride = Partial<
@@ -312,6 +318,13 @@ type ProductOverride = Partial<
 export const PRODUCT_OVERRIDES: Record<number, ProductOverride> = {
   // HDP24-24-18SE-L017 had no real photo (no_photo placeholder); Stefan supplied one.
   3465: { image: "/media/featured-products/hdp24-24-18se-l017.webp" },
+  // Stefan supplied cleaner product shots (2026-09-27) for three outlet parts; the old catalogue photos were 640x480.
+  3834: { image: "/media/outlet-components/0409-201-2400.jpg" }, // 0409-201-2400 cable clamp
+  4174: { image: "/media/outlet-components/hd18-003.jpg" }, // HD18-003 backshell
+  4193: { image: "/media/outlet-components/hdc16-5.jpg" }, // HDC16-5 dust cap
+  // Stefan's pictures for two non-outlet parts (2026-09-27): a sharper photo of the 0510-014-2406 seal, and a real photo where L47N-600-1 showed the logo swoosh.
+  3849: { image: "/media/outlet-components/0510-014-2406.jpg" }, // 0510-014-2406 connector seal
+  4219: { image: "/media/outlet-components/l47n-600-1.jpg" }, // L47N-600-1 steel lanyard
   // The Branson 2032S slot is presented as the current Branson GMX-W1 wire splicer.
   22940: {
     name: "Branson GMX-W1 Wire Splicer",

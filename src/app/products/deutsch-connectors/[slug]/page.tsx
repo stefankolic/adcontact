@@ -1,13 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package, Tag } from "lucide-react";
+import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package } from "lucide-react";
 import type { Metadata } from "next";
 import { getProductDetail, type RelatedProduct, type DrawingFile } from "@/data/deutschProductDetails";
-import { deutschProducts, seriesLabelFor, deutschSeoTitle } from "@/data/deutschConnectors";
+import { deutschProducts, seriesLabelFor, seriesLabelForProduct, deutschSeoTitle, REFERENCE_IMAGE_PARTS } from "@/data/deutschConnectors";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
-import { BuyOutletButton } from "@/components/outlet/BuyOutletButton";
+import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
+import { outletSoldOut } from "@/data/outletStock";
 import { brands } from "@/data/brands";
 import {
   findCatalogueProductByReference,
@@ -34,7 +35,7 @@ function productDescription(
   if (detail) {
     return `${cp.partNumber}: ${detail.specs["Series"] ?? "Deutsch"} sealed connector, ${detail.specs["No. of cavities"] ?? ""} way, contact size ${detail.specs["Contact Size"] ?? ""}. Request a quote from Adcontact Sweden.`;
   }
-  return `${cp.partNumber}: ${seriesLabelFor(cp.series)} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
+  return `${cp.partNumber}: ${seriesLabelForProduct(cp)} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -246,8 +247,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const outletListing = deutschOutletComponents.find(
     (o) => o.matchedPartNumber?.toUpperCase() === partNumber.toUpperCase(),
   );
-  const seriesLabel = seriesLabelFor(catalogueProduct.series);
-  const seriesColor = SERIES_COLORS[catalogueProduct.series] ?? "bg-slate-50 text-slate-700 border-slate-200";
+  const seriesLabel = seriesLabelForProduct(catalogueProduct);
+  // The dataset's series code and colour only apply when the label was not corrected from the specs (AMPSEAL).
+  const seriesFromCode = seriesLabel === seriesLabelFor(catalogueProduct.series);
+  const seriesChip = seriesFromCode ? catalogueProduct.series : seriesLabel.replace(/\s*Series$/i, "");
+  const seriesColor = (seriesFromCode ? SERIES_COLORS[catalogueProduct.series] : undefined) ?? "bg-slate-50 text-slate-700 border-slate-200";
 
   // Pull Magento catalogue data for every product — provides specs, contacts, accessories, files.
   const magentoProduct = findCatalogueProductByReference(partNumber);
@@ -313,12 +317,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     image: mainImage,
     url: pagePath,
     // Only the parts with real outlet stock carry a visible price on the page.
-    offer: outletListing ? { priceEur: outletListing.priceEur } : undefined,
+    offer: outletListing ? { priceEur: outletListing.priceEur, inStock: !outletSoldOut(outletListing) } : undefined,
   });
   const breadcrumbLd = breadcrumbJsonLd([
     { name: "Home", url: "/" },
     { name: "Webshop", url: "/webshop.html" },
-    { name: "Deutsch Connectors", url: "/webshop/components/sealed-connectors/deutsch/connectors.html" },
+    { name: "Deutsch Connectors", url: "/products/deutsch-connectors" },
     { name: partNumber, url: pagePath },
   ]);
 
@@ -350,7 +354,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <ChevronRight size={11} />
             <Link href="/webshop.html" className="hover:text-[#0a1628] transition-colors">Webshop</Link>
             <ChevronRight size={11} />
-            <Link href="/webshop/components/sealed-connectors/deutsch/connectors.html" className="hover:text-[#0a1628] transition-colors">Deutsch Connectors</Link>
+            <Link href="/products/deutsch-connectors" className="hover:text-[#0a1628] transition-colors">Deutsch Connectors</Link>
             <ChevronRight size={11} />
             <span className="text-[#0a1628] font-medium">{partNumber}</span>
           </nav>
@@ -380,37 +384,20 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
             </div>
+            {mainImage && REFERENCE_IMAGE_PARTS.has(partNumber.toUpperCase()) && (
+              <p className="mt-2 max-w-md text-xs text-[#64748b]">
+                Reference image of a similar part. Minor details may differ from the part supplied.
+              </p>
+            )}
 
             {/* Outlet stock — under the image, matched to its width. Only shown
                 when this exact part has its own outlet listing. */}
             {outletListing && (
-              <div className="mt-4 max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Tag size={14} className="flex-none text-amber-700" />
-                  <p className="text-sm font-bold text-amber-900">
-                    Outlet stock, €{outletListing.priceEur.toFixed(2)} per unit
-                  </p>
-                </div>
-                <p className="mt-1 text-xs leading-relaxed text-amber-800">
-                  {outletListing.quantity.toLocaleString()} in stock at our Keila warehouse, price
-                  for 1 to 10 pieces, while quantities last.{" "}
-                  <Link
-                    href="/outlet/components"
-                    className="font-semibold text-amber-900 underline decoration-2 underline-offset-2 hover:no-underline"
-                  >
-                    Browse the Components Outlet
-                  </Link>
-                </p>
-                {CHECKOUT_ELIGIBLE_SKUS.has(outletListing.sku) && (
-                  <div className="mt-3">
-                    <BuyOutletButton
-                      sku={outletListing.sku}
-                      maxQuantity={Math.min(outletListing.quantity, 99)}
-                      className="rounded-md bg-amber-500 px-4 py-2 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-600 disabled:opacity-60"
-                    />
-                  </div>
-                )}
-              </div>
+              <OutletStockBlock
+                item={outletListing}
+                canBuy={CHECKOUT_ELIGIBLE_SKUS.has(outletListing.sku)}
+                className="mt-4 max-w-md"
+              />
             )}
           </div>
 
@@ -419,7 +406,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${seriesColor}`}>
-                {catalogueProduct.series}
+                {seriesChip}
               </span>
               {catalogueProduct.ways !== null && (
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
@@ -681,7 +668,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {/* ── Back to catalogue ─────────────────────────────────────────── */}
         <div>
           <Link
-            href="/webshop/components/sealed-connectors/deutsch/connectors.html"
+            href="/products/deutsch-connectors#catalogue"
             className="inline-flex items-center gap-2 text-sm font-medium text-[#2563eb] hover:text-[#1d4ed8] transition-colors"
           >
             ← Back to Deutsch connector catalogue

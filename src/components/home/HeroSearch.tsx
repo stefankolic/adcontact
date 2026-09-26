@@ -31,7 +31,7 @@ const conveyorCss = `
 `;
 
 const quickLinks = [
-  { label: "Deutsch connectors", href: "/webshop/components/sealed-connectors/deutsch/connectors.html" },
+  { label: "Deutsch connectors", href: "/products/deutsch-connectors" },
   { label: "Heat shrink tubing", href: "/webshop/components/heat-shrinkable.html" },
   { label: "Crimping equipment", href: "/webshop/production-equipment/crimping-equipment.html" },
   { label: "M8/M12 connectors", href: "/webshop/components/sealed-connectors/htp.html" },
