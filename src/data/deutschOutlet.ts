@@ -43,8 +43,11 @@ export const deutschOutletComponents = generatedItems as OutletComponent[];
 export type OutletOwnSeo = {
   series?: string;
   ways?: number;
-  type?: "Plug" | "Socket";
+  type?: "Plug" | "Socket" | "Receptacle";
   shellSize?: string;
+  mounting?: string;
+  termination?: string;
+  wireGauge?: string;
   /** For parts that are not connectors: what it is (for example "Adaptor") and the series it fits. */
   kind?: string;
   fitsSeries?: string;
@@ -66,14 +69,14 @@ export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
   "247002-6072": { partNumber: "IMC26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg", seo: { series: "IMC Series", ways: 7, shellSize: "26", basis: "Contact count and shell size from the part number (IMC16-2003X pattern), photo shows 7 cavities" } },
   "247000-6052": { partNumber: "IMC21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg", seo: { series: "IMC Series", ways: 5, shellSize: "21", basis: "Contact count and shell size from the part number (IMC16-2003X pattern), photo shows 5 cavities" } },
   "247001-2022": { partNumber: "IMC14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg", seo: { series: "IMC Series", ways: 2, shellSize: "14", basis: "Contact count and shell size from the part number (IMC16-2003X pattern), photo shows 2 cavities" } },
-  "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg", seo: { ways: 20, type: "Plug", shellSize: "24", basis: "Arrangement 24-20P read as shell 24, 20 contacts, pins; supplier listings conflict, please confirm" } },
+  "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg", seo: { ways: 20, type: "Receptacle", shellSize: "24", mounting: "Panel mount", termination: "Crimp", wireGauge: "14 to 20 AWG", basis: "Confirmed by Stefan 2026-09-26 from the Mouser/TE listing he pasted: 20 positions, receptacle, panel mount, crimp, 14 to 20 AWG; shell size 24 read from the part number" } },
   "242016-460": { partNumber: "DT16-6SB-KP01", image: "/media/outlet-components/dt-16-6sb-kp01.jpg", seo: { series: "DT Series", ways: 6, type: "Socket", basis: "Confirmed by TE, TME and DigiKey listings and our DT16-6S-KP01 (6-way, DT Series, size 16 contacts)" } },
-  "244130-01": { partNumber: "0428-204-1890", image: "/media/outlet-components/0428-204-1890.jpg", seo: { kind: "Adaptor", fitsSeries: "HD30 Series", shellSize: "18", basis: "Same family as 0428-204-2490 (Mouser: Adaptor for HD30 Series Size 24); size 18 read from the part number, please confirm" } },
+  "244130-01": { partNumber: "0428-204-1890", image: "/media/outlet-components/0428-204-1890.jpg", seo: { kind: "Adaptor", fitsSeries: "HD30 Series", shellSize: "18", basis: "Confirmed by Stefan 2026-09-26: Deutsch Adaptor for HD30 Series Size 18 (same family as 0428-204-2490)" } },
   // 2026-09-26: new outlet row added by Stefan, photo and Mouser description supplied.
   "244131-01": { partNumber: "0428-204-2490", image: "/media/outlet-components/0428-204-2490.jpg", seo: { kind: "Adaptor", fitsSeries: "HD30 Series", shellSize: "24", basis: "Description from the Mouser listing supplied by Stefan: Deutsch 0428-204-2490 Adaptor for HD30 Series Size 24" } },
   // Reference image: the HDP24-18-14PE-L024 catalogue photo (same 14-way HDP24 family), padded to 640x640.
   "244026-0114": { partNumber: "HDP24-24-14PE", image: "/media/outlet-components/hdp24-24-14pe.jpg", seo: { series: "HDP Heavy Power Series", ways: 14, type: "Plug", shellSize: "24", basis: "14 contacts from the part number; sibling HDP24-18-14PE is HDP20 Series with 14 cavities in our data; series label matches the other HDP titles" }, reference: true },
-  "246020-016": { partNumber: "WT06B-20-16SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg", seo: { ways: 16, type: "Socket", shellSize: "20", basis: "16 contacts and shell 20 from the part number, S read as socket; series unknown; one listing calls it a plug, please confirm" } },
+  "246020-016": { partNumber: "WT06B-20-16SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg", seo: { ways: 16, type: "Socket", shellSize: "20", basis: "16 contacts and shell 20 from the part number, S read as socket; series unknown; Stefan reviewed the page and marked it OK 2026-09-26" } },
   "246024-031": { partNumber: "WT06B-24-31SN", image: "/media/outlet-components/wt06b-24-31sn.jpg", seo: { ways: 31, type: "Socket", shellSize: "24", basis: "Photo of the actual part: the ring is marked WT06B-24-31SN and the insert has 31 cavities; S read as socket; series unknown, please confirm" } },
 };
 

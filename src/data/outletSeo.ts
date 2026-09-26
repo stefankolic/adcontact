@@ -43,8 +43,11 @@ function ownSeo(item: OutletComponent): OutletSeo | null {
   if (f.fitsSeries) specs.push(["For series", f.fitsSeries]);
   if (f.series) specs.push(["Series", f.series]);
   if (f.ways) specs.push(["No. of cavities", String(f.ways)]);
-  if (f.type) specs.push(["Contact type", f.type]);
+  if (f.type) specs.push([f.type === "Receptacle" ? "Connector style" : "Contact type", f.type]);
   if (f.shellSize) specs.push(["Shell size", f.shellSize]);
+  if (f.mounting) specs.push(["Mounting style", f.mounting]);
+  if (f.termination) specs.push(["Termination", f.termination]);
+  if (f.wireGauge) specs.push(["Wire gauge", f.wireGauge]);
   specs.push(["Condition", "New, surplus stock"]);
   const what = kindText ? kindText : known ? `${f.series ? f.series + " " : ""}${f.ways}-way${f.type ? " " + f.type.toLowerCase() : ""} connector` : "Deutsch part";
   const description = `${partNumber}: ${what}. Surplus outlet stock from Adcontact's Keila warehouse, EUR ${item.priceEur.toFixed(2)} per unit while quantities last. Buy online or request a quote.`;
