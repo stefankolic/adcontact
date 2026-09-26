@@ -145,8 +145,46 @@ export function catalogueDescriptor(
     const ways = single(a["No. of cavities"]);
     return done([series, `${/^\d+$/.test(ways) ? ways + "-Way " : ""}Backshell`, "180°", color].filter(Boolean).join(", "), "Family rule (Stefan): HD18-00x is a 180 degree backshell for HD10");
   }
-  if (isAccessory && /^1011-[01]\d\d-/.test(pn) && /^Receptacle$/i.test(a["Connector Style"] ?? "") && !sf && /^\d+$/.test(single(a["No. of cavities"]))) {
-    return done([series, `${single(a["No. of cavities"])}-Way Receptacle Seal Retainer`, color].filter(Boolean).join(", "), "Family rule (Stefan, from two answers): 1011-0xx/1xx receptacle parts with a cavity count are seal retainers");
+  if (isAccessory && /^1011-[01]\d\d-/.test(pn) && /^Receptacle$/i.test(a["Connector Style"] ?? "") && !sf && waysFor05(pn, a)) {
+    return done([series, `${waysFor05(pn, a)}-Way Receptacle Seal Retainer`, color].filter(Boolean).join(", "), "Family rule (Stefan, from two answers): 1011-0xx/1xx receptacle parts with a way count are seal retainers");
+  }
+
+  // Part families described in Stefan's notes (2026-09-27, from TE/TME/Mouser/Dalroad product guide and Google AI text, so
+  // marked "please confirm" in the review sheet): 1028 and tubing adapters = backshell, 2428 = HDP20 backshell,
+  // 1027 = metal mounting bracket, M902 = HD10 strain relief. AMPSEAL is parked and left alone.
+  const amp = /AMPSEAL/i.test(a["Series"] ?? "");
+  const angle = /^90\s*°/i.test(sf) ? "90°" : /^180\s*°/i.test(sf) ? "180°" : /^Straight/i.test(sf) ? "Straight" : "";
+  const shell = (a["Shell Size"] ?? "").match(/(\d+)/)?.[1];
+  const usedWith = sf.match(/used with (L\d+)/i)?.[1];
+  if (isAccessory && !amp && /^1028-/.test(pn) && /adapter/i.test(sf)) {
+    return done([series, `${angle ? angle + " " : ""}Backshell Adapter`].filter(Boolean).join(", "), "Family rule (Stefan's notes): 1028 is a backshell / cable holder; the text says adapter");
+  }
+  if (isAccessory && !amp && (/^1028-/.test(pn) || /tubing/i.test(sf))) {
+    const tube = sf.match(/NW ([\d.]+)(?: and NW ([\d.]+))? tubing/i);
+    const ways = waysFor05(pn, a);
+    return done(
+      [series, `${ways ? ways + "-Way " : ""}Backshell`, angle, tube ? `NW ${tube[1]}${tube[2] ? " and NW " + tube[2] : ""} Tubing` : ""].filter(Boolean).join(", "),
+      "Family rule (Stefan's notes): 1028 and parts whose text names conduit tubing are backshells / cable holders",
+    );
+  }
+  if (isAccessory && !amp && /^2428-/.test(pn)) {
+    return done([series, `${shell ? "Size " + shell + " " : ""}Backshell`, angle, usedWith ? `Used with ${usedWith}` : ""].filter(Boolean).join(", "), "Family rule (Stefan's notes): 2428 is a backshell for HDP20 (shell size and modification code from the catalogue)");
+  }
+  if (isAccessory && !amp && /^1027-/.test(pn)) {
+    const cav = single(a["No. of cavities"]);
+    const material = has(a["Material"]) ? a["Material"].split(" ").map(cap).join(" ") + " " : "";
+    const hole = sf.match(/^(\.\d+) O\.D\. hole/i)?.[1];
+    return done(
+      [series, `${/^\d+$/.test(cav) ? cav + "-Way " : ""}${material}Mounting Bracket`, /^Zinc$/i.test(color) ? "Zinc" : "", hole ? `${hole} O.D. Hole` : ""].filter(Boolean).join(", "),
+      "Family rule (Stefan's notes): 1027 is a metal mounting bracket; material, colour and hole size from the catalogue",
+    );
+  }
+  if (isAccessory && !amp && /^M902-/i.test(pn)) {
+    const cav = single(a["No. of cavities"]);
+    return done(
+      [series, `${/^\d+$/.test(cav) ? cav + "-Way " : ""}Strain Relief`, shell ? `Size ${shell}` : "", usedWith ? `Used with ${usedWith}` : ""].filter(Boolean).join(", "),
+      "Family rule (Stefan's notes): M902 is a strain relief / compression nut for HD10; series, ways and shell size from the catalogue",
+    );
   }
 
   // Item names the catalogue text states outright.
