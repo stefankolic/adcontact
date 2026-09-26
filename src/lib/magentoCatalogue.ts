@@ -322,6 +322,9 @@ export const PRODUCT_OVERRIDES: Record<number, ProductOverride> = {
   3834: { image: "/media/outlet-components/0409-201-2400.jpg" }, // 0409-201-2400 cable clamp
   4174: { image: "/media/outlet-components/hd18-003.jpg" }, // HD18-003 backshell
   4193: { image: "/media/outlet-components/hdc16-5.jpg" }, // HDC16-5 dust cap
+  // Stefan's pictures for two non-outlet parts (2026-09-27): a sharper photo of the 0510-014-2406 seal, and a real photo where L47N-600-1 showed the logo swoosh.
+  3849: { image: "/media/outlet-components/0510-014-2406.jpg" }, // 0510-014-2406 connector seal
+  4219: { image: "/media/outlet-components/l47n-600-1.jpg" }, // L47N-600-1 steel lanyard
   // The Branson 2032S slot is presented as the current Branson GMX-W1 wire splicer.
   22940: {
     name: "Branson GMX-W1 Wire Splicer",

@@ -187,6 +187,54 @@ export function catalogueDescriptor(
     );
   }
 
+  // Part families labelled by Stefan in the review workbook (2026-09-27). Each rule keeps to what he wrote and adds series,
+  // ways, size and colour from the catalogue. AMPSEAL stays out.
+  if (isAccessory && !amp) {
+    const cav = /^\d+$/.test(single(a["No. of cavities"])) ? single(a["No. of cavities"]) : "";
+    const cavWay = cav ? `${cav}-Way ` : "";
+    const sizeShell = shell ? `Size ${shell} ` : "";
+    const blockSize = String(Number(pn.match(/-(\d{2})\d{2}$/)?.[1] ?? "0") || "");
+    const env = /^Non-env\. sealed$/i.test(sf) ? "Non-Env. Sealed" : /^Env\. sealed/i.test(sf) ? "Env. Sealed" : "";
+    const style = single(a["Connector Style"]);
+    const metal = /^metal$/i.test(a["Material"] ?? "") ? "" : has(a["Material"]) ? a["Material"].split(" ").map(cap).join(" ") + " " : "";
+    const fam = (parts: string[], why: string) => done(parts.filter(Boolean).join(", "), `Family label (Stefan): ${why}`);
+    if (/^1011-0(26|30)-/.test(pn)) return fam([series, "Mounting Clip", color], "1011-026 and -030 are mounting clips for DT/DTM/DTP PCB connectors");
+    const n1011 = Number(pn.match(/^1011-(\d{3})-/)?.[1] ?? "0");
+    if (n1011 >= 227 && n1011 <= 250) {
+      const ways = waysFor05(pn, a);
+      return fam([series, `${ways ? ways + "-Way " : ""}${style ? style + " " : ""}Backshell`, n1011 <= 229 ? "180°" : "", color], "1011-227 to -250 are DT backshells (180° stated for 227-229)");
+    }
+    if (/^1013-/.test(pn)) return fam([series, `${cavWay || (waysFor05(pn, a) ? waysFor05(pn, a) + "-Way " : "")}Silicone Seal`, color], "1013 is an environmental seal (orange silicone, receptacle)");
+    if (/^DT[MP]?\d+[SP]-DC/i.test(pn)) {
+      const ways = waysFor(pn, a, DT_WAYS);
+      return fam([series, `${ways ? ways + "-Way " : ""}Protective Cover`, color], "-DC is a protective cover");
+    }
+    if (/^11\d{4}-90$/.test(pn)) return fam([series, `${sizeShell}Panel Nut`, color], "112263-90 is a panel nut for HD30 receptacles");
+    if (/^11\d{4}$/.test(pn)) return fam([series, `${sizeShell}Sealing Plug`, color], "the digits-only 11xxxx parts are sealing plugs");
+    if (/^0526-/.test(pn)) return fam([series, `${cavWay}Retaining Bolt`], "0526 is a retaining bolt for DRC");
+    if (/^SRK-BS-/.test(pn)) return fam([series, "Backshell", /-90-/.test(pn) ? "90°" : /-ST-/.test(pn) ? "Straight" : "", has(a["Shell Size"]) ? a["Shell Size"].split(" ").map(cap).join(" ") : ""], "SRK-BS is a STRIKE backshell");
+    if (/^WHDS-/.test(pn)) return fam([series, `${sizeShell}${metal}Strain Relief`], "WHDS is a steel strain relief for HD30");
+    if (/^0413-/.test(pn)) return fam([series, /^Locking/i.test(sf) ? "Locking Sealing Plug" : "Sealing Plug", blockSize ? `Size ${blockSize}` : "", color], "0413 is a sealing plug");
+    if (/^0504-/.test(pn)) return fam([series, `${cavWay}Dust Cap`, color, env], "0504 is a DRC dust cap");
+    if (/^0730-/.test(pn)) return fam([series, `Size ${cav || blockSize} Coupling Ring`, color], "0730 is an HD10 coupling ring");
+    if (/^0411-32[34]-/.test(pn)) return fam([series, `${sizeShell}Wire Router`], "0411-323 and -324 are wire routers for HD30/HDP20");
+    if (/^0510-/.test(pn)) return fam([series, `${cavWay}Connector Seal`], "0510 is a connector seal for DRC");
+    if (/^0535-/.test(pn)) return fam([series, `${metal}Connector Bolt`], "0535 is a connector bolt for DRC");
+    if (/^16-04\d{3}$/.test(pn)) return fam([series, `${sizeShell}${metal}Receptacle Gasket`], "16-04xxx is a receptacle gasket for HD30/HDP20");
+    if (/^2411-/.test(pn)) return fam([series, `${sizeShell}Nut`, color, "PPS"], "2411 is a PPS nut for HDP");
+    if (/^2414-/.test(pn)) return fam([series, `${sizeShell}${/^Curved$/i.test(sf) ? "Curved " : ""}Steel Lockwasher`], "2414 is a steel lockwasher for HDP");
+    if (/^3315-/.test(pn)) return fam([series, `${cavWay}Protective Cover`, color, env], "3315 is a DRB protective cover");
+    if (/^5004-/.test(pn)) return fam([series, "Dust Cap", color, /^Screws included$/i.test(sf) ? "Screws Included" : ""], "5004 is an HD30 dust cap");
+    const lan = sf.match(/^Steel,\s*(\d+\/\d+)\D*x\s*(\d+)"/i);
+    if (/^L47N-/.test(pn) && lan) return fam([series, "Steel Lanyard", `${lan[1]}" x ${lan[2]}"`, "Nylon Coated"], "L47N is a nylon-coated steel lanyard");
+    if (/^JDL/.test(pn)) return fam([series, "Rubber Lanyard"], "JDL is a rubber lanyard for HD10");
+    if (/^0410-/.test(pn)) return fam([series || "HD30 Series", "Cavity Reducer", metal.trim(), color], "0410 is a silicone rubber cavity reducer for HD30");
+    if (/^0514-/.test(pn)) return fam([series, "Mounting Washer"], "0514 is a mounting washer");
+    if (/^CN\d+$/.test(pn)) return fam([series, `${sizeShell}Cap Nut`, usedWith ? `Used with ${usedWith}` : ""], "CN is a cap nut for HDP20");
+    if (/^SRN\d+$/.test(pn)) return fam([series, `${sizeShell}Backshell Sealing Ring`, usedWith ? `Used with ${usedWith}` : ""], "SRN is a backshell sealing ring for HDP20");
+  }
+  if (isTool && /^HDP-400$/i.test(pn)) return done("Pneumatic Hand Crimping Tool", "Family label (Stefan): HDP-400 is a pneumatic, interchangeable hand crimping tool");
+
   // Item names the catalogue text states outright.
   const seal = sf.match(/^Seal,\s*(front|internal),\s*(enhanced,\s*)?(.+?)\*?\s*$/i);
   if (seal) return done(`${seal[2] ? "Enhanced " : ""}${cap(seal[1].toLowerCase())} Seal ${seal[3].trim()}`, "Seal text from the catalogue specifications");
