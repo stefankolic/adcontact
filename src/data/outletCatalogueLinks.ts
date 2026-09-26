@@ -36,6 +36,9 @@ export const OUTLET_CATALOGUE_PAGES: Record<string, OutletCatalogueLink> = {
   "242003-131": { productId: 1917, partNumber: "W3P-1939", route: "/webshop/components/accessories/deutsch/w3p-1939.html", image: "/media/catalog/product/W/3/W3P-1939.jpg" }, // W3P-1939
   "242004-0310": { productId: 3966, partNumber: "1011-310-0205", route: "/webshop/components/accessories/deutsch/1011-310-0205.html", image: "/media/catalog/product/1/0/1011-310-0205_1.jpg" }, // 1011-310-0205 Mounting Clip DT/DTM/DTP
   "242004-82": { productId: 3996, partNumber: "1028-021-0205", route: "/webshop/components/accessories/deutsch/1028-021-0205.html", image: "/media/catalog/product/1/0/1028-021-0205_1.jpg" }, // 1028-021-0205 Back Shell 180 DTM042P tie-wrap
+  "242003-043": { productId: 1885, partNumber: "W4SB", route: "/webshop/components/accessories/deutsch/w4sb.html", image: "/media/catalog/product/W/4/W4SB_1.jpg" }, // W4SB
+  "242003-044": { productId: 1884, partNumber: "W4SC", route: "/webshop/components/accessories/deutsch/w4sc.html", image: "/media/catalog/product/W/4/W4SC_1.jpg" }, // W4SC
+  "242003-045": { productId: 1886, partNumber: "W4SA", route: "/webshop/components/accessories/deutsch/w4sa.html", image: "/media/catalog/product/W/4/W4SA_1.jpg" }, // W4SA
   "242013-024": { productId: 1931, partNumber: "W2SA-P012", route: "/webshop/components/accessories/deutsch/w2sa-p012.html", image: "/media/catalog/product/W/2/W2SA-P012.jpg" }, // W2SA-P012
   "242100-20": { productId: 4410, partNumber: "DTT-16-00", route: "/webshop/components/tools/deutsch/dtt-16-00.html", image: "/media/catalog/product/D/T/DTT-16-00_1.jpg" }, // DTT-16-00 Hand tool
   "242113-024": { productId: 1859, partNumber: "WM-2PB", route: "/webshop/components/accessories/deutsch/wm-2pb.html", image: "/media/catalog/product/W/M/WM-2PB.jpg" }, // WM-2PB
