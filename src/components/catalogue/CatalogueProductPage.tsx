@@ -7,7 +7,8 @@ import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
 import { brands } from "@/data/brands";
 import { outletItemForCatalogueProduct } from "@/data/deutschOutlet";
 import { OUTLET_CATALOGUE_PAGES } from "@/data/outletCatalogueLinks";
-import { outletSoldOut, outletStock } from "@/data/outletStock";
+import { outletSoldOut } from "@/data/outletStock";
+import { outletSeo } from "@/data/outletSeo";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { productJsonLd } from "@/lib/productSchema";
 import { normalizeLegacyHtml, stripLegacyHtml, stripInlineStyles } from "@/lib/legacyHtml";
@@ -159,18 +160,20 @@ export default function CatalogueProductPage({
     ? "Request full specification and a quote"
     : "Request a quote";
   const primaryImage = magentoImageSrc(product.image ?? product.gallery[0] ?? product.thumbnail);
-  const title = titleForProduct(product);
   // Only parts with their own outlet listing carry a price, a Buy button and
-  // Product schema (Google's validator rejects a Product with no offer).
+  // Product schema (Google's validator rejects a Product with no offer). Their
+  // H1 and schema name are the outlet SEO title, the same text the Merchant feed uses.
   const outlet = outletItemForCatalogueProduct(product.id);
   const outletLink = outlet ? OUTLET_CATALOGUE_PAGES[outlet.sku] : undefined;
+  const outletSeoData = outlet ? outletSeo(outlet) : null;
+  const title = outletSeoData?.title ?? titleForProduct(product);
   const outletLd =
     outlet && outletLink && primaryImage
       ? productJsonLd({
-          name: `${product.brand ?? product.manufacturer ?? "Deutsch"} ${title}`,
+          name: outletSeoData?.title ?? `${product.brand ?? product.manufacturer ?? "Deutsch"} ${title}`,
           partNumber: sku,
           brand: product.brand ?? product.manufacturer ?? "Deutsch",
-          description: `${title}, surplus outlet stock from Adcontact's own warehouse in Keila. New, EUR ${outlet.priceEur.toFixed(2)} per unit, ${outletSoldOut(outlet) ? "Currently sold out." : `${outletStock(outlet).toLocaleString("en-US")} in stock.`}`,
+          description: outletSeoData?.description ?? `${title}, surplus outlet stock from Adcontact's own warehouse in Keila.`,
           image: primaryImage,
           url: outletLink.route,
           offer: { priceEur: outlet.priceEur, inStock: !outletSoldOut(outlet) },

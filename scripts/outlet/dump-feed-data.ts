@@ -10,6 +10,7 @@ import {
 } from "../../src/data/deutschOutlet";
 import { OUTLET_CATALOGUE_PAGES } from "../../src/data/outletCatalogueLinks";
 import { outletStock } from "../../src/data/outletStock";
+import { outletSeo } from "../../src/data/outletSeo";
 import { deutschSeoTitleByPartNumber, REFERENCE_IMAGE_PARTS } from "../../src/data/deutschConnectors";
 import { findCatalogueProductByReference, getProductBreadcrumbs } from "../../src/lib/magentoCatalogue";
 
@@ -53,6 +54,7 @@ const rows = deutschOutletComponents.flatMap((item) => {
     categoryName,
     catalogueName,
     reference,
+    seo: outletSeo(item),
     quantity: outletStock(item),
     priceEur: item.priceEur,
     link: SITE + href,

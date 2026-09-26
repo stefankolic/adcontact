@@ -7,33 +7,29 @@ import { OUTLET_OWN_PAGES, outletItemBySlug, outletOwnPage, outletSlug } from "@
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
 import { outletSoldOut, outletStock } from "@/data/outletStock";
+import { outletSeo } from "@/data/outletSeo";
+import QuoteForm from "@/components/QuoteForm";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/productSchema";
 
 export function generateStaticParams() {
   return Object.values(OUTLET_OWN_PAGES).map((page) => ({ slug: outletSlug(page.partNumber) }));
 }
 
-function describe(partNumber: string, priceEur: number, quantity: number): string {
-  const base = `Deutsch ${partNumber}, surplus outlet stock from Adcontact's own warehouse in Keila. New, EUR ${priceEur.toFixed(2)} per unit`;
-  return quantity > 0
-    ? `${base}, ${quantity.toLocaleString("en-US")} in stock. Buy online or ask for volume pricing.`
-    : `${base}. Currently sold out, ask us whether we can source more.`;
-}
-
 function lookup(slug: string) {
   const item = outletItemBySlug(slug);
   const page = item ? outletOwnPage(item) : null;
-  return item && page ? { item, page } : null;
+  const seo = item ? outletSeo(item) : null;
+  return item && page && seo ? { item, page, seo } : null;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const found = lookup(slug);
   if (!found) return {};
-  const { item, page } = found;
+  const { page, seo } = found;
   return {
-    title: `Deutsch ${page.partNumber}, Outlet Surplus Stock`,
-    description: describe(page.partNumber, item.priceEur, outletStock(item)),
+    title: `${page.partNumber} | Deutsch Connector Outlet`,
+    description: seo.description,
     alternates: { canonical: `/outlet/components/${slug}` },
   };
 }
@@ -42,15 +38,15 @@ export default async function OutletComponentPage({ params }: { params: Promise<
   const { slug } = await params;
   const found = lookup(slug);
   if (!found) notFound();
-  const { item, page } = found;
+  const { item, page, seo } = found;
 
   const pagePath = `/outlet/components/${slug}`;
   const productLd = productJsonLd({
-    name: `Deutsch ${page.partNumber}, outlet surplus stock`,
+    name: seo.title,
     partNumber: page.partNumber,
     brand: "Deutsch",
     category: "Hardware > Power & Electrical Supplies > Wire Terminals & Connectors",
-    description: describe(page.partNumber, item.priceEur, outletStock(item)),
+    description: seo.description,
     image: page.image,
     url: pagePath,
     offer: { priceEur: item.priceEur, inStock: !outletSoldOut(item) },
@@ -69,8 +65,6 @@ export default async function OutletComponentPage({ params }: { params: Promise<
   )}`;
 
   const facts: { label: string; value: string }[] = [
-    { label: "Part number", value: page.partNumber },
-    { label: "Brand", value: "Deutsch" },
     { label: "Condition", value: "New, surplus stock" },
     { label: "Our stock code", value: item.sku },
     { label: "In stock", value: outletSoldOut(item) ? "Sold out" : outletStock(item).toLocaleString("en-US") },
@@ -103,7 +97,7 @@ export default async function OutletComponentPage({ params }: { params: Promise<
               {page.image ? (
                 <Image
                   src={page.image}
-                  alt={`Deutsch ${page.partNumber}`}
+                  alt={seo.title}
                   fill
                   className="object-contain p-8"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -133,7 +127,7 @@ export default async function OutletComponentPage({ params }: { params: Promise<
             </div>
 
             <h1 className="text-2xl lg:text-3xl font-bold text-[#0a1628] mb-2 tracking-tight">
-              Deutsch {page.partNumber}
+              {seo.title}
             </h1>
             <p className="text-[#64748b] text-sm mb-6">
               Surplus stock from our own warehouse, sold at outlet pricing while quantities last.
@@ -181,6 +175,44 @@ export default async function OutletComponentPage({ params }: { params: Promise<
               .
             </p>
           </div>
+        </div>
+
+        <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_380px]">
+          <div className="space-y-10">
+            <section>
+              <h2 className="text-lg font-bold text-[#0a1628] mb-4">Technical specifications</h2>
+              <div className="bg-white border border-[#e5e7eb] rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <tbody className="divide-y divide-[#f1f5f9]">
+                    {[...seo.specs, ["Our stock code", item.sku] as [string, string], ["Location", "Keila, Estonia"] as [string, string]].map(([key, value], i) => (
+                      <tr key={key} className={i % 2 === 0 ? "bg-white" : "bg-[#f8fafc]"}>
+                        <td className="px-5 py-3 font-medium text-[#64748b] w-56 text-xs uppercase tracking-wide">{key}</td>
+                        <td className="px-5 py-3 font-semibold text-[#0a1628]">{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-[#64748b]">
+                Missing a detail, a drawing or a datasheet? Ask us and we will send what we have.
+              </p>
+            </section>
+
+            <div>
+              <Link
+                href="/products/deutsch-connectors"
+                className="inline-flex items-center gap-2 text-sm font-medium text-[#2563eb] hover:text-[#1d4ed8] transition-colors"
+              >
+                ← Browse Deutsch connectors
+              </Link>
+            </div>
+          </div>
+
+          <aside id="quote" className="scroll-mt-24">
+            <div className="lg:sticky lg:top-[140px]">
+              <QuoteForm defaultPartNumber={page.partNumber} title={`Request a quote for ${page.partNumber}`} />
+            </div>
+          </aside>
         </div>
       </main>
     </div>

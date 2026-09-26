@@ -34,28 +34,43 @@ export const deutschOutletComponents = generatedItems as OutletComponent[];
  *  `sku`. `partNumber` is the clean manufacturer part number shown on the
  *  page (the sheet's own `description` is inconsistent), `image` is the
  *  `/media/...` path of the photo in R2. */
+/** What we know about an own-page part, for the SEO title, description and the
+ *  Technical specifications table. Only facts that are known go in: a missing
+ *  field is left out of the page rather than guessed. `type` follows the
+ *  Deutsch letter in the part number (S = Socket, P = Plug), the same
+ *  convention the existing product titles use. `basis` is for our own review
+ *  sheet only and is never shown on the site. */
+export type OutletOwnSeo = {
+  series?: string;
+  ways?: number;
+  type?: "Plug" | "Socket";
+  shellSize?: string;
+  basis?: string;
+};
+
 export type OutletOwnPage = {
   partNumber: string;
   image: string;
+  seo?: OutletOwnSeo;
   /** True when the photo shows a similar variant, not this exact part; the
    *  page then labels it "Reference image". */
   reference?: boolean;
 };
 
 export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
-  "247002-2003": { partNumber: "IMC16-2003X", image: "/media/outlet-components/imc-16-2003x.jpg" },
-  "247000-2002": { partNumber: "IMC11-2002X", image: "/media/outlet-components/imc-11-2002x.jpg" },
-  "247002-6072": { partNumber: "IMC26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg" },
-  "247000-6052": { partNumber: "IMC21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg" },
-  "247001-2022": { partNumber: "IMC14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg" },
-  "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg" },
-  "242016-460": { partNumber: "DT16-6SB-KP01", image: "/media/outlet-components/dt-16-6sb-kp01.jpg" },
-  "244130-01": { partNumber: "0428-204-1890", image: "/media/outlet-components/0428-204-1890.jpg" },
+  "247002-2003": { partNumber: "IMC16-2003X", image: "/media/outlet-components/imc-16-2003x.jpg", seo: { series: "IMC Series", ways: 3, shellSize: "16", basis: "3 contacts and IMC Series confirmed by RS and Mouser listings; shell size from the part number" } },
+  "247000-2002": { partNumber: "IMC11-2002X", image: "/media/outlet-components/imc-11-2002x.jpg", seo: { series: "IMC Series", ways: 2, shellSize: "11", basis: "Contact count and shell size from the part number (IMC16-2003X pattern), photo shows the same count" } },
+  "247002-6072": { partNumber: "IMC26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg", seo: { series: "IMC Series", ways: 7, shellSize: "26", basis: "Contact count and shell size from the part number (IMC16-2003X pattern), photo shows 7 cavities" } },
+  "247000-6052": { partNumber: "IMC21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg", seo: { series: "IMC Series", ways: 5, shellSize: "21", basis: "Contact count and shell size from the part number (IMC16-2003X pattern), photo shows 5 cavities" } },
+  "247001-2022": { partNumber: "IMC14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg", seo: { series: "IMC Series", ways: 2, shellSize: "14", basis: "Contact count and shell size from the part number (IMC16-2003X pattern), photo shows 2 cavities" } },
+  "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg", seo: { ways: 20, type: "Plug", shellSize: "24", basis: "Arrangement 24-20P read as shell 24, 20 contacts, pins; supplier listings conflict, please confirm" } },
+  "242016-460": { partNumber: "DT16-6SB-KP01", image: "/media/outlet-components/dt-16-6sb-kp01.jpg", seo: { series: "DT Series", ways: 6, type: "Socket", basis: "Confirmed by TE, TME and DigiKey listings and our DT16-6S-KP01 (6-way, DT Series, size 16 contacts)" } },
+  "244130-01": { partNumber: "0428-204-1890", image: "/media/outlet-components/0428-204-1890.jpg", seo: { basis: "Type unknown (photo shows a clear ring or cap); nothing invented, please supply the description" } },
   // Reference image: the HDP24-18-14PE-L024 catalogue photo (same 14-way HDP24 family), padded to 640x640.
-  "244026-0114": { partNumber: "HDP24-24-14PE", image: "/media/outlet-components/hdp24-24-14pe.jpg", reference: true },
-  "246020-016": { partNumber: "WT06B-20-16SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg" },
+  "244026-0114": { partNumber: "HDP24-24-14PE", image: "/media/outlet-components/hdp24-24-14pe.jpg", seo: { series: "HDP Heavy Power Series", ways: 14, type: "Plug", shellSize: "24", basis: "14 contacts from the part number; sibling HDP24-18-14PE is HDP20 Series with 14 cavities in our data; series label matches the other HDP titles" }, reference: true },
+  "246020-016": { partNumber: "WT06B-20-16SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg", seo: { ways: 16, type: "Socket", shellSize: "20", basis: "16 contacts and shell 20 from the part number, S read as socket; series unknown; one listing calls it a plug, please confirm" } },
   // Same photo as the 20-16; the part number suggests a larger shell with more cavities (24-31), so it is labelled a reference image.
-  "246024-031": { partNumber: "WT06B-24-31SN", image: "/media/outlet-components/wt-06b-24-31-sn.jpg", reference: true },
+  "246024-031": { partNumber: "WT06B-24-31SN", image: "/media/outlet-components/wt-06b-24-31-sn.jpg", seo: { ways: 31, type: "Socket", shellSize: "24", basis: "31 contacts and shell 24 from the part number, S read as socket; series unknown, please confirm" }, reference: true },
 };
 
 for (const sku of Object.keys(OUTLET_OWN_PAGES)) {

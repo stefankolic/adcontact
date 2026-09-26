@@ -4,7 +4,9 @@
 # 2) python scripts/outlet/build-merchant-feed.py <previous.xlsx> feed-data.json <new.xlsx>
 # Existing rows keep their text (titles are Stefan's); only price, link, image, availability and the
 # reference quantity are refreshed. Rows for newly eligible outlet SKUs are appended. Quantity is the
-# live stock (quantity_remaining) and a row at zero becomes "out of stock". Requires openpyxl.
+# live stock (quantity_remaining) and a row at zero becomes "out of stock". Every row gets
+# google_product_category 503729 (Wire Terminals & Connectors, Stefan's Sheet value); the column is added
+# after mpn when the previous workbook lacks it. Requires openpyxl.
 import copy, csv, json, re, sys
 from openpyxl import load_workbook
 
@@ -12,11 +14,21 @@ prev_path, data_path, out_path = sys.argv[1:4]
 TAIL = "Surplus stock from Adcontact's own warehouse, sold at outlet pricing while quantities last."
 CATEGORY_NOUN = {"Accessories": "Accessory", "Contacts": "Contact", "Tools": "Tool", "Connectors": "Connector"}
 CONNECTOR_PREFIXES = ("IMC", "WT", "DT16", "HDP24", "8N1534")
+GOOGLE_PRODUCT_CATEGORY = 503729
 
 data = json.load(open(data_path, encoding="utf8"))
 wb = load_workbook(prev_path)
 ws = wb.worksheets[0]
 header = [c.value for c in ws[1]]
+if "google_product_category" not in header:
+    at = header.index("mpn") + 2  # 1-based column right after mpn
+    ws.insert_cols(at)
+    for r in range(1, ws.max_row + 1):
+        src = ws.cell(r, at - 1)
+        if src.has_style:
+            ws.cell(r, at)._style = copy.copy(src._style)
+    ws.cell(1, at, "google_product_category")
+    header = [c.value for c in ws[1]]
 col = {h: i for i, h in enumerate(header)}
 norm = lambda s: re.sub(r"[^a-z0-9]", "", s.lower())
 
@@ -39,6 +51,10 @@ def new_row(r):
             desc = f"{mpn}, {parts[0]} connector from Deutsch. {TAIL}"
         else:
             desc = f"{mpn} connector from Deutsch. {TAIL}"
+    elif r.get("seo"):
+        mpn = r["partNumber"]
+        title = r["seo"]["shortTitle"]
+        desc = r["seo"]["feedDescription"]
     elif r["kind"] == "catalogue":
         mpn = r["partNumber"]
         noun = CATEGORY_NOUN.get(r["categoryName"] or "", "")
@@ -64,7 +80,7 @@ def new_row(r):
         desc += " Image shows a similar part."
     return {"id": r["sku"], "title": title, "description": desc, "link": r["link"], "image_link": r["imageLink"],
             "availability": "in stock" if r["quantity"] > 0 else "out of stock", "price": f"{r['priceEur']:.2f} EUR", "condition": "new", "brand": "Deutsch",
-            "mpn": mpn, "qty_available_reference_only": r["quantity"]}
+            "mpn": mpn, "google_product_category": GOOGLE_PRODUCT_CATEGORY, "qty_available_reference_only": r["quantity"]}
 
 by_id = {r["sku"]: r for r in data}
 seen, drift = set(), []
@@ -72,6 +88,10 @@ for row in ws.iter_rows(min_row=2):
     rid = str(row[col["id"]].value or "")
     if not rid: continue
     seen.add(rid)
+    cat_cell = row[col["google_product_category"]]
+    if cat_cell.value in (None, ""):
+        cat_cell.value = GOOGLE_PRODUCT_CATEGORY
+        drift.append((rid, "google_product_category set to 503729"))
     r = by_id.get(rid)
     if r is None:
         drift.append((rid, "no longer eligible")); continue
