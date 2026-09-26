@@ -38,7 +38,7 @@ const industrialComponentsGroup: NavGroup = {
       href: "/webshop/components/sealed-connectors.html",
       children: [
         { label: "Stocko", href: "/webshop/components/sealed-connectors/stocko.html" },
-        { label: "Deutsch Connectors", href: "/webshop/components/sealed-connectors/deutsch.html" },
+        { label: "Deutsch Connectors", href: "/products/deutsch-connectors" },
         { label: "TE Connectivity", href: "/webshop/components/sealed-connectors/te-connectivity.html" },
         { label: "Cvilux", href: "/webshop/components/sealed-connectors/cvilux.html" },
         { label: "Vogt", href: "/webshop/components/sealed-connectors/vogt.html" },

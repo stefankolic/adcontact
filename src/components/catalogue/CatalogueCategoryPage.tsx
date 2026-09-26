@@ -24,9 +24,6 @@ import { getMenuBrandHub, type BrandBox } from "@/data/navigation";
 import { deutschProducts } from "@/data/deutschConnectors";
 import { featuredProducts } from "@/data/featuredProducts";
 import {
-  DEUTSCH_SERIES_CATEGORY_ROUTE,
-  DEUTSCH_SERIES_INTRO,
-  deutschSeriesByName,
   TE_CONNECTIVITY_SERIES_CATEGORY_ROUTE,
   TE_CONNECTIVITY_SERIES_INTRO,
   teConnectivitySeriesByName,
@@ -113,10 +110,6 @@ function brandForCategory(category: CatalogueCategory) {
   }
   return undefined;
 }
-
-// AMPSEAL and AMPSEAL 16 are TE Connectivity series, not part of the DEUTSCH
-// series family — excluded from the DEUTSCH facets, surfaced on the TE page.
-const AMPSEAL_SERIES = /^ampseal\b/i;
 
 // Product "Series" values (DT, DTM, HDP20 …) with counts, sorted by size.
 // `exclude` drops matching series (e.g. AMPSEAL from the DEUTSCH hub).
@@ -656,24 +649,7 @@ type SeriesPageConfig = {
   fallbackBlurb: string;
 };
 
-function getSeriesPageConfig(
-  category: CatalogueCategory,
-  children: CatalogueCategory[],
-): SeriesPageConfig | undefined {
-  // DEUTSCH: series live in the largest child (Connectors). AMPSEAL is excluded
-  // because those are TE Connectivity series.
-  if (category.route === DEUTSCH_SERIES_CATEGORY_ROUTE) {
-    const target = [...children].sort(
-      (a, b) => getCategoryProductCount(b) - getCategoryProductCount(a),
-    )[0];
-    return {
-      target,
-      intro: DEUTSCH_SERIES_INTRO,
-      seriesByName: deutschSeriesByName,
-      exclude: AMPSEAL_SERIES,
-      fallbackBlurb: "DEUTSCH sealed connector series.",
-    };
-  }
+function getSeriesPageConfig(category: CatalogueCategory): SeriesPageConfig | undefined {
   // TE Connectivity: products (the AMPSEAL family) live directly in this category.
   if (category.route === TE_CONNECTIVITY_SERIES_CATEGORY_ROUTE) {
     return {
@@ -1266,7 +1242,7 @@ export default function CatalogueCategoryPage({
           ? webshopRootFeaturedPool
           : getCategoryProducts(category, undefined);
 
-  const seriesPage = getSeriesPageConfig(category, children);
+  const seriesPage = getSeriesPageConfig(category);
   const seriesFacets = seriesPage
     ? getSeriesFacets(seriesPage.target, seriesPage.exclude)
     : [];

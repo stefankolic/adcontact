@@ -1,7 +1,7 @@
 // Curated DEUTSCH connector series content, transcribed from the original
-// Adcontact "DT Series" slideshow banners. The `name` of each entry matches
-// the product "Series" attribute value so cards can be enriched with live
-// product counts and linked to the filtered catalogue view.
+// "DT Series" slideshow banners. The `name` of each entry matches the product
+// "Series" attribute value; the Deutsch hub (/products/deutsch-connectors) shows
+// the first features on each series card.
 
 export type DeutschSeriesInfo = {
   /** Must match the product "Series" attribute value exactly. */
@@ -11,13 +11,6 @@ export type DeutschSeriesInfo = {
   /** Key features as shown on the original banners. */
   features?: string[];
 };
-
-// Only rendered on this catalogue category.
-export const DEUTSCH_SERIES_CATEGORY_ROUTE =
-  "/webshop/components/sealed-connectors/deutsch.html";
-
-export const DEUTSCH_SERIES_INTRO =
-  "DEUTSCH industrial environmentally sealed electrical connectors are built for critical applications, designed to withstand the harshest and most challenging environments.";
 
 export const deutschSeries: DeutschSeriesInfo[] = [
   {
@@ -100,10 +93,8 @@ export const deutschSeries: DeutschSeriesInfo[] = [
     name: "Jiffy Splice",
     features: ["Contact sizes 4 (100 A), 12 (25 A) & 16 (13 A)", "6–20 AWG", "1-cavity arrangement"],
   },
-  // AMPSEAL and AMPSEAL 16 are TE Connectivity series, not part of the DEUTSCH
-  // series family, so they are intentionally excluded here and filtered out of
-  // the "Browse by series" facets in CatalogueCategoryPage. They are presented
-  // on the dedicated TE Connectivity page instead (see below).
+  // AMPSEAL and AMPSEAL 16 are TE Connectivity series, so they have no entry
+  // here; the dedicated TE Connectivity page presents them (see below).
 ];
 
 export const deutschSeriesByName = new Map(

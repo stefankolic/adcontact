@@ -322,7 +322,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const breadcrumbLd = breadcrumbJsonLd([
     { name: "Home", url: "/" },
     { name: "Webshop", url: "/webshop.html" },
-    { name: "Deutsch Connectors", url: "/webshop/components/sealed-connectors/deutsch/connectors.html" },
+    { name: "Deutsch Connectors", url: "/products/deutsch-connectors" },
     { name: partNumber, url: pagePath },
   ]);
 
@@ -354,7 +354,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <ChevronRight size={11} />
             <Link href="/webshop.html" className="hover:text-[#0a1628] transition-colors">Webshop</Link>
             <ChevronRight size={11} />
-            <Link href="/webshop/components/sealed-connectors/deutsch/connectors.html" className="hover:text-[#0a1628] transition-colors">Deutsch Connectors</Link>
+            <Link href="/products/deutsch-connectors" className="hover:text-[#0a1628] transition-colors">Deutsch Connectors</Link>
             <ChevronRight size={11} />
             <span className="text-[#0a1628] font-medium">{partNumber}</span>
           </nav>
@@ -668,7 +668,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {/* ── Back to catalogue ─────────────────────────────────────────── */}
         <div>
           <Link
-            href="/webshop/components/sealed-connectors/deutsch/connectors.html"
+            href="/products/deutsch-connectors#catalogue"
             className="inline-flex items-center gap-2 text-sm font-medium text-[#2563eb] hover:text-[#1d4ed8] transition-colors"
           >
             ← Back to Deutsch connector catalogue

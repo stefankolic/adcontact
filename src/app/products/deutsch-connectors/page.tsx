@@ -6,14 +6,16 @@ import type { Metadata } from "next";
 import CatalogueClient from "./CatalogueClient";
 import { deutschProducts } from "@/data/deutschConnectors";
 import { seriesSummaries, type SeriesSummary } from "@/data/deutschAttributes";
+import { deutschSeriesByName } from "@/data/deutschSeries";
+import { getCatalogueCategory, getCategoryProductCount } from "@/lib/magentoCatalogue";
 
 const PAGE_URL = "https://www.adcontact.se/products/deutsch-connectors";
 const OG_IMAGE = "https://www.adcontact.se/images/DT_Series_-_1.png";
 
 export const metadata: Metadata = {
-  title: { absolute: "Deutsch DT, DTM & DTP Connectors | IP67 Sealed | Adcontact" },
+  title: { absolute: "Deutsch Connectors: DT, DTM, DTP, HD & DRC Series | Adcontact" },
   description:
-    "DEUTSCH DT, DTM, DTP and AT sealed connectors, contacts, wedgelocks and crimp tools. IP67 rated, −55 °C to +125 °C, for off-highway, automotive, marine and industrial use. Nordic stock and fast quotes.",
+    "DEUTSCH sealed connectors: the DT, DTM, DTP, AT, DRC, HD10 and HD30 series, plus contacts, wedgelocks and crimp tools. IP67 rated, −55 °C to +125 °C, for off-highway, automotive, marine and industrial use. Nordic stock and fast quotes.",
   keywords: [
     "Deutsch connectors",
     "DEUTSCH DT connector",
@@ -37,9 +39,9 @@ export const metadata: Metadata = {
     type: "website",
     url: PAGE_URL,
     siteName: "Adcontact",
-    title: "Deutsch DT, DTM, DTP & AT Sealed Connectors | Adcontact",
+    title: "Deutsch Connectors: DT, DTM, DTP, HD & DRC Series | Adcontact",
     description:
-      "IP67-rated DEUTSCH sealed connectors, contacts, wedgelocks and crimp tools for harsh environments. Full DT, DTM, DTP and AT ranges stocked in the Nordics.",
+      "IP67-rated DEUTSCH sealed connectors, contacts, wedgelocks and crimp tools for harsh environments. Sixteen connector series, stocked in the Nordics.",
     images: [
       {
         url: OG_IMAGE,
@@ -51,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deutsch DT, DTM, DTP & AT Sealed Connectors | Adcontact",
+    title: "Deutsch Connectors: DT, DTM, DTP, HD & DRC Series | Adcontact",
     description:
       "IP67-rated DEUTSCH sealed connectors, contacts, wedgelocks and crimp tools. Full ranges stocked in the Nordics with technical support.",
     images: [OG_IMAGE],
@@ -444,23 +446,40 @@ const faqLd = {
 // Short marketing taglines per original DEUTSCH series, keyed by the exact
 // series label used by the storefront's Series filter.
 const SERIES_TAGLINES: Record<string, string> = {
-  "DT Series": "The industry workhorse. IP67, size 16 contacts (13 A), 2–12 way.",
-  "DTM Series": "Miniature sealed connectors, size 20 contacts (7.5 A) for compact circuits.",
-  "DTP Series": "High-current power, size 12 contacts rated 25 A.",
-  "DTHD Series": "Heavy-duty DT variant for high-vibration environments.",
-  "DTV Series": "DT-family variant for sealed signal connections.",
+  "DT Series": "The industry workhorse, IP67 sealed.",
+  "DTM Series": "Miniature sealed connectors for compact circuits.",
+  "DTP Series": "High-current power connectors.",
+  "DTHD Series": "Single-cavity DT connectors for high-current power.",
+  "DTV Series": "Flange-mount DT-family connector.",
   "HD30 Series": "Heavy-duty circular connectors for demanding industrial wiring.",
   "HD10 Series": "Rugged circular connectors for harsh-environment power and signal.",
   "HDP20 Series": "Large heavy-duty power connectors with high contact counts.",
-  "DRC Series": "High-density sealed connectors, up to 40+ way, for harsh environments.",
-  "DRB Series": "DRC and HD backshells and strain-relief accessories.",
+  "DRC Series": "High-density sealed connectors for harsh environments.",
+  "DRB Series": "High-density sealed connectors with up to 128 cavities.",
   "AMPSEAL Series": "Sealed connectors for demanding automotive and transportation wiring.",
   "AMPSEAL 16 Series": "Compact sealed connectors for higher-density signal circuits.",
-  "AEC Series": "Sealed DEUTSCH connector series for harsh environments.",
-  "EEC": "Sealed DEUTSCH connector series.",
+  "AEC Series": "High-density sealed connector series.",
+  "EEC": "Header connectors that accept DT and DTM interfaces.",
   "Jiffy Splice": "Sealed in-line splice connectors for field wiring.",
-  "STRIKE Series": "Sealed DEUTSCH connector series.",
+  "STRIKE Series": "High-density sealed connectors, 32 and 64 cavities.",
 };
+
+// The 795 contacts, accessories and tools that are not in the connector dataset
+// live in the Magento subcategories; the hub links to them from each section.
+function FullRangeLink({ categoryId, noun }: { categoryId: number; noun: string }) {
+  const category = getCatalogueCategory(categoryId);
+  if (!category?.route) return null;
+  const count = getCategoryProductCount(category);
+  return (
+    <Link
+      href={category.route}
+      className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2563eb] transition-colors hover:text-[#1d4ed8]"
+    >
+      Browse all {count.toLocaleString("en-US")} Deutsch {noun} in the webshop
+      <ArrowRight size={14} />
+    </Link>
+  );
+}
 
 function seriesCode(label: string): string {
   return label.replace(/\s*Series$/i, "");
@@ -468,6 +487,7 @@ function seriesCode(label: string): string {
 
 function SeriesOverviewCard({ s }: { s: SeriesSummary }) {
   const tagline = SERIES_TAGLINES[s.label] ?? "Sealed DEUTSCH connector series.";
+  const facts = deutschSeriesByName.get(s.label)?.features?.slice(0, 2);
   return (
     <Link
       href={`/products/deutsch-connectors?series=${encodeURIComponent(s.label)}#catalogue`}
@@ -506,7 +526,15 @@ function SeriesOverviewCard({ s }: { s: SeriesSummary }) {
         <h3 className="text-base font-bold text-[#0a1628] transition-colors group-hover:text-[#2563eb]">
           {s.label}
         </h3>
-        <p className="mt-1 flex-1 text-xs leading-relaxed text-[#64748b]">{tagline}</p>
+        <p className="mt-1 text-xs leading-relaxed text-[#64748b]">{tagline}</p>
+        {facts && (
+          <ul className="mt-2 space-y-0.5 text-[11px] leading-snug text-[#475569]">
+            {facts.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+        )}
+        <div className="flex-1" />
         <div className="mt-3 flex flex-wrap gap-1.5">
           {s.minCav !== null && (
             <span className="rounded border border-[#e5e7eb] bg-[#f8fafc] px-2 py-0.5 text-[10px] font-medium text-[#475569]">
@@ -775,6 +803,7 @@ export default function DeutschConnectorsPage() {
               <p className="text-[#64748b] max-w-2xl">
                 All Deutsch DT/DTM series use size-16 contacts. DTP and high-current AT series use size-12 contacts. Contacts are sold separately from housings, choose the wire gauge that matches your application.
               </p>
+              <FullRangeLink categoryId={122} noun="contacts" />
             </div>
             <div className="flex gap-3 flex-shrink-0">
               {["/images/0460-202-1631.jpg", "/images/0460-204-0490_1.jpg"].map((src) => (
@@ -870,6 +899,7 @@ export default function DeutschConnectorsPage() {
             <p className="text-[#64748b] max-w-2xl">
               Wedgelocks mechanically retain contacts and are required for IP67 sealing, always order them with your housings. Cavity plugs seal unused positions in the same housing.
             </p>
+            <FullRangeLink categoryId={121} noun="accessories" />
           </div>
 
           {/* Wedgelocks */}
@@ -986,6 +1016,7 @@ export default function DeutschConnectorsPage() {
             <p className="text-[#64748b] max-w-2xl">
               Deutsch contacts require the correct crimp tool to achieve the specified crimp quality. Using the wrong tool, or pliers, will result in a non-conforming crimp that cannot be detected visually. Always verify the contact size before selecting the tool.
             </p>
+            <FullRangeLink categoryId={123} noun="tools" />
           </div>
 
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">

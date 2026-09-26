@@ -262,6 +262,7 @@ const ULTRASEAL20_ROUTE =
   "/webshop/production-equipment/ultrasonic-welding/branson-ultraseal20-metal-tube-sealer.html";
 const CRIMP = "/webshop/production-equipment/crimping-equipment";
 const WEZAG_ROUTE = `${CRIMP}/wezag.html`;
+const DEUTSCH_HUB_ROUTE = "/products/deutsch-connectors";
 const WZ_30_ROUTE = `${CRIMP}/wezag/handtang-wz-30.html`;
 const WZ_100_ROUTE = `${CRIMP}/wezag/handtang-wz-100.html`;
 const WZ_130_ROUTE = `${CRIMP}/wezag/presshuvud-wz-130.html`;
@@ -304,6 +305,11 @@ export const CATEGORY_CANONICAL_ROUTES: Record<number, string> = {
   // but still resolving by direct URL. Redirect both to that landing.
   105: "/products/zoller-frohlich/wire-processing", // old Stripping Machines > Z&F grid (6 products)
   109: "/products/zoller-frohlich/wire-processing", // old Crimping equipment > Z&F grid (27 products)
+  // The rich Deutsch hub is the single Deutsch landing page. Both legacy Magento
+  // pages (the category and its "Connectors" subcategory) 301 to it; Accessories,
+  // Contacts and Tools (121-123) stay as catalogue pages and link back to it.
+  86: DEUTSCH_HUB_ROUTE, // Deutsch Connectors category
+  120: DEUTSCH_HUB_ROUTE, // Deutsch > Connectors subcategory (1,794 parts)
 };
 
 type ProductOverride = Partial<
