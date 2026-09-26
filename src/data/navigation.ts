@@ -186,6 +186,7 @@ const NAV_BRAND_ALIASES: Record<string, string> = {
   "feintechnik-rittmyer": "feintechnik-rittmeyer", // route keeps the data's misspelling
   "test-quality": "mav", // Test & Quality hub repurposed as the Mav page
   "wire-processing": "zoller-frohlich", // Z+F lean landing under /products
+  "deutsch-connectors": "deutsch", // Deutsch hub under /products
 };
 
 function brandForNavItem(item: NavItem): Brand | undefined {
@@ -207,7 +208,9 @@ export type BrandHub =
   | { type: "section"; groups: { label: string; brands: BrandBox[] }[] };
 
 function toBrandBox(item: NavItem): BrandBox {
-  const slug = item.href.split("/").filter(Boolean).pop()?.replace(/\.html$/, "") ?? "";
+  const last = item.href.split("/").filter(Boolean).pop()?.replace(/\.html$/, "") ?? "";
+  // The Deutsch hub keeps the brand slug so the brand-box logo fixes keyed on "deutsch" still apply.
+  const slug = last === "deutsch-connectors" ? "deutsch" : last;
   return { label: item.label, href: item.href, slug, logo: brandForNavItem(item)?.logo };
 }
 
