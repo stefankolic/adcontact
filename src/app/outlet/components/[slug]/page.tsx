@@ -1,12 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ChevronRight, Mail, Package } from "lucide-react";
+import { ArrowRight, ChevronRight, Mail, Package, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import { OUTLET_OWN_PAGES, outletItemBySlug, outletOwnPage, outletSlug } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
-import { outletSoldOut, outletStock } from "@/data/outletStock";
+import { outletSoldOut } from "@/data/outletStock";
 import { outletSeo } from "@/data/outletSeo";
 import QuoteForm from "@/components/QuoteForm";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/productSchema";
@@ -64,12 +64,19 @@ export default async function OutletComponentPage({ params }: { params: Promise<
     `Hi,\n\nI'd like to ask about this part from your components outlet:\n\nSKU: ${item.sku}\nPart: ${page.partNumber}\nQuantity wanted: \n\nThanks!`,
   )}`;
 
-  const facts: { label: string; value: string }[] = [
-    { label: "Condition", value: "New, surplus stock" },
-    { label: "Our stock code", value: item.sku },
-    { label: "In stock", value: outletSoldOut(item) ? "Sold out" : outletStock(item).toLocaleString("en-US") },
-    { label: "Location", value: "Keila, Estonia" },
-  ];
+  // Same header pieces as the regular Deutsch part page: chips, one-line summary, quick spec cards.
+  const own = page.seo ?? {};
+  const kindLine = own.kind ? `${own.kind}${own.fitsSeries ? ` for ${own.fitsSeries}` : ""}` : "";
+  const summary = [
+    own.series,
+    own.ways ? `${own.ways}-way` : "",
+    own.type,
+    kindLine,
+    own.shellSize ? `${own.kind ? "Size" : "Shell size"} ${own.shellSize}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const quickSpecs = seo.specs.filter(([label]) => !["Part number", "Brand", "Condition"].includes(label));
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -116,27 +123,12 @@ export default async function OutletComponentPage({ params }: { params: Promise<
                 Reference image of a similar part. Minor details may differ from the part supplied.
               </p>
             )}
-          </div>
 
-          <div className="flex flex-col">
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-800 border-amber-200">
-                Outlet
-              </span>
-              <span className="text-xs text-[#64748b]">Deutsch</span>
-            </div>
-
-            <h1 className="text-2xl lg:text-3xl font-bold text-[#0a1628] mb-2 tracking-tight">
-              {seo.title}
-            </h1>
-            <p className="text-[#64748b] text-sm mb-6">
-              Surplus stock from our own warehouse, sold at outlet pricing while quantities last.
-            </p>
-
+            {/* Outlet stock under the image, matched to its width, as on the Deutsch and catalogue part pages. */}
             <OutletStockBlock
               item={item}
               canBuy={CHECKOUT_ELIGIBLE_SKUS.has(item.sku)}
-              className="max-w-md"
+              className="mt-4 max-w-md"
             />
 
             {!outletSoldOut(item) && (
@@ -149,15 +141,83 @@ export default async function OutletComponentPage({ params }: { params: Promise<
                 </a>
               </p>
             )}
+          </div>
 
-            <dl className="mt-8 grid max-w-md grid-cols-2 gap-3">
-              {facts.map((f) => (
-                <div key={f.label} className="rounded-lg border border-[#e5e7eb] bg-white p-3">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-[#9ca3af] mb-0.5">{f.label}</dt>
-                  <dd className="text-sm font-semibold text-[#0a1628]">{f.value}</dd>
-                </div>
-              ))}
-            </dl>
+          <div className="flex flex-col">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-800 border-amber-200">
+                Outlet
+              </span>
+              {own.series && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                  {own.series.replace(/\s*Series$/i, "")}
+                </span>
+              )}
+              {own.ways && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                  {own.ways}-way
+                </span>
+              )}
+              {own.type && (
+                <span
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                    own.type === "Socket"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-violet-50 text-violet-700 border-violet-200"
+                  }`}
+                >
+                  {own.type}
+                </span>
+              )}
+              {own.kind && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                  {own.kind}
+                </span>
+              )}
+              <span className="text-xs text-[#64748b]">Deutsch</span>
+            </div>
+
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#0a1628] mb-2 tracking-tight">
+              {seo.title}
+            </h1>
+            <p className="text-[#64748b] text-sm mb-5">
+              {summary || "Surplus stock from our own warehouse, sold at outlet pricing while quantities last."}
+            </p>
+
+            {quickSpecs.length > 0 && (
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                {quickSpecs.map(([label, value]) => (
+                  <div key={label} className="bg-white border border-[#e5e7eb] rounded-lg p-3">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-[#9ca3af] mb-0.5">{label}</div>
+                    <div className="text-sm font-semibold text-[#0a1628]">{value}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href="#quote"
+                className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#f59e0b] hover:bg-[#d97706] text-[#0a1628] font-semibold rounded-lg transition-colors"
+              >
+                Request a quote
+                <ArrowRight size={15} />
+              </a>
+              <Link
+                href="/contact"
+                className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-[#f8fafc] border border-[#e5e7eb] text-[#374151] font-medium rounded-lg transition-colors"
+              >
+                <Phone size={14} />
+                Call us
+              </Link>
+              <a
+                href={`mailto:info@adcontact.se?subject=Quote request: ${page.partNumber}`}
+                className="flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-[#f8fafc] border border-[#e5e7eb] text-[#374151] font-medium rounded-lg transition-colors"
+              >
+                <Mail size={14} />
+                Email
+              </a>
+            </div>
 
             <p className="mt-6 max-w-md text-xs leading-5 text-[#64748b]">
               Delivery and returns are covered in our{" "}
