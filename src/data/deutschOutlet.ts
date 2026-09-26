@@ -43,19 +43,19 @@ export type OutletOwnPage = {
 };
 
 export const OUTLET_OWN_PAGES: Record<string, OutletOwnPage> = {
-  "247002-2003": { partNumber: "IMC 16-2003X", image: "/media/outlet-components/imc-16-2003x.jpg" },
-  "247000-2002": { partNumber: "IMC 11-2002X", image: "/media/outlet-components/imc-11-2002x.jpg" },
-  "247002-6072": { partNumber: "IMC 26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg" },
-  "247000-6052": { partNumber: "IMC 21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg" },
-  "247001-2022": { partNumber: "IMC 14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg" },
+  "247002-2003": { partNumber: "IMC16-2003X", image: "/media/outlet-components/imc-16-2003x.jpg" },
+  "247000-2002": { partNumber: "IMC11-2002X", image: "/media/outlet-components/imc-11-2002x.jpg" },
+  "247002-6072": { partNumber: "IMC26-2007X", image: "/media/outlet-components/imc-26-2007x.jpg" },
+  "247000-6052": { partNumber: "IMC21-2005X", image: "/media/outlet-components/imc-21-2005x.jpg" },
+  "247001-2022": { partNumber: "IMC14-2002X", image: "/media/outlet-components/imc-14-2002x.jpg" },
   "244534-120": { partNumber: "8N1534-24-20P", image: "/media/outlet-components/8n1534-24-20p.jpg" },
-  "242016-460": { partNumber: "DT 16-6SB KP01", image: "/media/outlet-components/dt-16-6sb-kp01.jpg" },
+  "242016-460": { partNumber: "DT16-6SB-KP01", image: "/media/outlet-components/dt-16-6sb-kp01.jpg" },
   "244130-01": { partNumber: "0428-204-1890", image: "/media/outlet-components/0428-204-1890.jpg" },
   // Reference image: the HDP24-18-14PE-L024 catalogue photo (same 14-way HDP24 family), padded to 640x640.
   "244026-0114": { partNumber: "HDP24-24-14PE", image: "/media/outlet-components/hdp24-24-14pe.jpg", reference: true },
-  "246020-016": { partNumber: "WT 06B-20-16 SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg" },
+  "246020-016": { partNumber: "WT06B-20-16SN", image: "/media/outlet-components/wt-06b-20-16-sn.jpg" },
   // Same photo as the 20-16; the part number suggests a larger shell with more cavities (24-31), so it is labelled a reference image.
-  "246024-031": { partNumber: "WT 06B-24-31 SN", image: "/media/outlet-components/wt-06b-24-31-sn.jpg", reference: true },
+  "246024-031": { partNumber: "WT06B-24-31SN", image: "/media/outlet-components/wt-06b-24-31-sn.jpg", reference: true },
 };
 
 for (const sku of Object.keys(OUTLET_OWN_PAGES)) {
@@ -74,6 +74,57 @@ for (const [sku, page] of Object.entries(OUTLET_OWN_PAGES)) {
   const clash = slugOwners.get(slug);
   if (clash) throw new Error(`Outlet page slug "${slug}" is used by both ${clash} and ${sku}`);
   slugOwners.set(slug, sku);
+}
+
+const alnum = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+/** Writes a Deutsch-shaped part number the way Deutsch and our product pages
+ *  do: no space after the initial letters (DRC 16-40 SE gives DRC16-40SE),
+ *  letter and short-digit codes joined (P 02 gives P02), and three-digit or
+ *  letter-plus-digit codes hyphenated (PN 059 gives PN-059, KP01 gives -KP01).
+ *  Anything that is not Deutsch-shaped, or that carries an English note, is
+ *  returned unchanged apart from collapsed spaces. Checked against the rows
+ *  that have a known canonical number (2026-09-26). */
+export function normalizePartNumber(raw: string): string {
+  const d = raw.trim().replace(/\s+/g, " ");
+  if (!/^[A-Z]{2,5} ?\d{1,2}[A-Z]?-/.test(d)) return d;
+  const tokens = d.split(" ");
+  let out = tokens[0];
+  for (let i = 1; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (i === 1 && /^[A-Z]+$/.test(tokens[0]) && /^\d/.test(t)) out += t;
+    else if (/^[A-Z]{1,2}$/.test(t)) out += t;
+    else if (/^\d{1,2}$/.test(t)) out += t;
+    else if (/^\d{3}$/.test(t)) out += (out.endsWith("-") ? "" : "-") + t;
+    else if (/^[A-Z]+\d+[A-Z]*$/.test(t)) out += (out.endsWith("-") ? "" : "-") + t;
+    else out += " " + t;
+  }
+  return out;
+}
+
+/** The canonical part number for an outlet row: the Deutsch-dataset number
+ *  when matched, the catalogue's own number or our own-page number when the row
+ *  has one, otherwise the normalized sheet text. */
+export function outletPartNumber(item: OutletComponent): string {
+  if (item.matchedPartNumber) return item.matchedPartNumber;
+  return OUTLET_OWN_PAGES[item.sku]?.partNumber ?? OUTLET_CATALOGUE_PAGES[item.sku]?.partNumber ?? normalizePartNumber(item.description);
+}
+
+/** What the outlet shows for a row: the canonical part number followed by any
+ *  note the sheet carried after it (Front Seal DT06-2S, Removal tool size 8). */
+export function outletDisplayName(item: OutletComponent): string {
+  const pn = outletPartNumber(item);
+  const desc = item.description.trim().replace(/\s+/g, " ");
+  for (let i = 1; i <= desc.length; i++) {
+    if (alnum(desc.slice(0, i)) === alnum(pn)) return (pn + " " + desc.slice(i).trim()).trim();
+  }
+  return normalizePartNumber(desc);
+}
+
+/** Lower-case letters and digits only, one string per searchable field, so
+ *  "DRC16-40SE", "drc 16 40 se" and "drc1640" all find the same row. */
+export function outletSearchKeys(item: OutletComponent): string[] {
+  return [alnum(item.sku), alnum(item.description), alnum(outletDisplayName(item))];
 }
 
 /** The outlet row whose part is the given Magento catalogue product, if any. */

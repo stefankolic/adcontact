@@ -11,7 +11,7 @@ from openpyxl import load_workbook
 prev_path, data_path, out_path = sys.argv[1:4]
 TAIL = "Surplus stock from Adcontact's own warehouse, sold at outlet pricing while quantities last."
 CATEGORY_NOUN = {"Accessories": "Accessory", "Contacts": "Contact", "Tools": "Tool", "Connectors": "Connector"}
-CONNECTOR_PREFIXES = ("IMC", "WT ", "DT 16", "HDP24", "8N1534")
+CONNECTOR_PREFIXES = ("IMC", "WT", "DT16", "HDP24", "8N1534")
 
 data = json.load(open(data_path, encoding="utf8"))
 wb = load_workbook(prev_path)

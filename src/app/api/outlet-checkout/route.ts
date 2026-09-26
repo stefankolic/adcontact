@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { getDb } from "@/lib/db";
-import { deutschOutletComponents } from "@/data/deutschOutlet";
+import { deutschOutletComponents, outletDisplayName } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 
 /**
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
           currency: "eur",
           unit_amount: Math.round(item.priceEur * 100),
           product_data: {
-            name: `${item.description} (Adcontact Outlet)`,
+            name: `${outletDisplayName(item)} (Adcontact Outlet)`,
             metadata: { sku: item.sku },
           },
         },
