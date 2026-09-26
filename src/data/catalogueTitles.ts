@@ -204,6 +204,11 @@ export function catalogueDescriptor(
       const ways = waysFor05(pn, a);
       return fam([series, `${ways ? ways + "-Way " : ""}${style ? style + " " : ""}Backshell`, n1011 <= 229 ? "180°" : "", color], "1011-227 to -250 are DT backshells (180° stated for 227-229)");
     }
+    if (n1011 >= 344 && n1011 <= 349) {
+      const ways = waysFor05(pn, a);
+      return fam([series, `${ways ? ways + "-Way " : ""}${/^Plug$/i.test(style) ? "Plug " : ""}Dust Cap`, color], "1011-344 to -349 are dust caps for DT plugs");
+    }
+    if (n1011 === 273) return fam([series, `${waysFor05(pn, a) ? waysFor05(pn, a) + "-Way " : ""}Backshell`, color], "1011-273 is a DTM backshell");
     if (/^1013-/.test(pn)) return fam([series, `${cavWay || (waysFor05(pn, a) ? waysFor05(pn, a) + "-Way " : "")}Silicone Seal`, color], "1013 is an environmental seal (orange silicone, receptacle)");
     if (/^DT[MP]?\d+[SP]-DC/i.test(pn)) {
       const ways = waysFor(pn, a, DT_WAYS);
