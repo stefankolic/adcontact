@@ -43,7 +43,18 @@ const LASTMOD_OVERRIDES: { prefix: string; date: string }[] = [
   // 2026-09-12: all 1,794 Deutsch connector pages got a new SEO-optimised
   // H1/JSON-LD (title format matching the GMC feed, corrected category) -
   // see [[seo-audit-fixes]].
-  { prefix: "/products/deutsch-connectors/", date: "2026-09-12" },
+  // 2026-09-26: /products/deutsch-connectors is now the single Deutsch landing page (the two legacy
+  // Magento pages redirect to it), every part page got the hub as breadcrumb and back link, and the
+  // AMPSEAL series labels were corrected. Covers the hub itself and all part pages.
+  { prefix: "/products/deutsch-connectors", date: "2026-09-26" },
+  // 2026-09-26: the ~700 Deutsch contact, accessory and tool pages got spec-based headings and meta
+  // descriptions, and the hub as breadcrumb parent (three URL families point at the same products).
+  { prefix: "/webshop/components/sealed-connectors/deutsch/", date: "2026-09-26" },
+  { prefix: "/webshop/components/accessories/deutsch/", date: "2026-09-26" },
+  { prefix: "/webshop/components/contacts/deutsch/", date: "2026-09-26" },
+  { prefix: "/webshop/components/tools/deutsch/", date: "2026-09-26" },
+  // 2026-09-26: outlet pages (own pages, price, stock and sold-out state, new photos).
+  { prefix: "/outlet/components", date: "2026-09-26" },
 ];
 
 function lastModifiedFor(path: string): string | undefined {
