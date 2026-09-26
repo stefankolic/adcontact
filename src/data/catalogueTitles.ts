@@ -48,6 +48,15 @@ function waysFor(pn: string, a: Record<string, string>, pattern: RegExp): string
   return /^\d+$/.test(cav) && new RegExp(`(?<!\\d)${cav}(?!\\d)`).test(pn) ? cav : "";
 }
 
+// 05xx parts: the catalogue cavity count, else the two digits Deutsch puts at the start of the last number block
+// (0528-003-3805 is a 38-way part); "00" means none.
+function waysFor05(pn: string, a: Record<string, string>): string {
+  const cav = single(a["No. of cavities"]);
+  if (/^\d+$/.test(cav)) return cav;
+  const m = pn.match(/-(\d{2})\d{2}$/);
+  return m && m[1] !== "00" ? String(Number(m[1])) : "";
+}
+
 const DT_WAYS = /^DT[MPV]?(\d+)[SP]/i;
 const WEDGE_NAME = /^W[BMPV]?-?(\d+)[A-Z]*(?:-|$)/i;
 
@@ -67,7 +76,7 @@ export function catalogueDescriptor(
   const isAccessory = routeType === "accessories";
   const isConnector = /connectors/.test(routeType);
   const done = (descriptor: string, basis: string, connector = false, feedText = ""): CatalogueDescriptor => ({ descriptor, basis, connector, feedText });
-  const sf = (a["Special Features"] ?? "").trim();
+  const sf = (a["Special Features"] ?? "").replace(/&deg;?/g, "°").trim();
   const series = seriesLabel(a["Series"]);
   const color = single(a["Color"]);
 
@@ -112,6 +121,34 @@ export function catalogueDescriptor(
     return done([series, noun, /P012/i.test(pn) ? "P012 version" : ""].filter(Boolean).join(", "), "Name rule and catalogue: wedgelock, key coding, P012 version, series and ways");
   }
 
+  // Families Stefan identified from his own review (2026-09-27): HDC = dust cap, 0513 = internal seal (DRC/AEC),
+  // 0515 = wire router, 0528 = backshell (DRC), HD18-00x = 180 degree backshell (HD10), 1011-0xx/1xx DT-family
+  // receptacle parts = seal retainer.
+  const shortSf = sf && sf.length <= 20 && !/^Requires/i.test(sf) ? sf : "";
+  if (isAccessory && /^HDC/i.test(pn)) {
+    const ways = single(a["No. of cavities"]);
+    return done([series, `${/^\d+$/.test(ways) ? ways + "-Way " : ""}Dust Cap`, color].filter(Boolean).join(", "), "Family rule (Stefan): HDC is a dust cap; series, ways and colour from the catalogue");
+  }
+  if (isAccessory && /^0513-/.test(pn)) {
+    const ways = waysFor05(pn, a);
+    return done([series, `${ways ? ways + "-Way " : ""}Internal Seal`].filter(Boolean).join(", "), "Family rule (Stefan): 0513 is an internal seal for DRC; series and ways from the catalogue");
+  }
+  if (isAccessory && /^0515-/.test(pn)) {
+    const ways = waysFor05(pn, a);
+    return done([series, `${ways ? ways + "-Way " : ""}Wire Router`, color, /^Non-env\. sealed$/i.test(sf) ? "Non-Env. Sealed" : ""].filter(Boolean).join(", "), "Family rule (Stefan): 0515 is a wire router for DRC; series, ways and colour from the catalogue");
+  }
+  if (isAccessory && /^0528-/.test(pn)) {
+    const ways = waysFor05(pn, a);
+    return done([series, `${ways ? ways + "-Way " : ""}Backshell`, color, shortSf].filter(Boolean).join(", "), "Family rule (Stefan): 0528 is a backshell for DRC; series, ways and colour from the catalogue");
+  }
+  if (isAccessory && /^HD18-\d{3}$/i.test(pn)) {
+    const ways = single(a["No. of cavities"]);
+    return done([series, `${/^\d+$/.test(ways) ? ways + "-Way " : ""}Backshell`, "180°", color].filter(Boolean).join(", "), "Family rule (Stefan): HD18-00x is a 180 degree backshell for HD10");
+  }
+  if (isAccessory && /^1011-[01]\d\d-/.test(pn) && /^Receptacle$/i.test(a["Connector Style"] ?? "") && !sf && /^\d+$/.test(single(a["No. of cavities"]))) {
+    return done([series, `${single(a["No. of cavities"])}-Way Receptacle Seal Retainer`, color].filter(Boolean).join(", "), "Family rule (Stefan, from two answers): 1011-0xx/1xx receptacle parts with a cavity count are seal retainers");
+  }
+
   // Item names the catalogue text states outright.
   const seal = sf.match(/^Seal,\s*(front|internal),\s*(enhanced,\s*)?(.+?)\*?\s*$/i);
   if (seal) return done(`${seal[2] ? "Enhanced " : ""}${cap(seal[1].toLowerCase())} Seal ${seal[3].trim()}`, "Seal text from the catalogue specifications");
@@ -128,7 +165,7 @@ export function catalogueDescriptor(
   }
   if (isAccessory) {
     if (/^Strain relief for jacketed cable$/i.test(sf)) return done(["Strain Relief for Jacketed Cable", series].filter(Boolean).join(", "), "Special Features text: strain relief");
-    if (/^Cable clamp$/i.test(sf)) return done("Cable Clamp", "Special Features text: cable clamp");
+    if (/^Cable clamp$/i.test(sf)) return done(["Cable Clamp", series].filter(Boolean).join(", "), "Special Features text: cable clamp; series from the catalogue");
     if (/^Vibration Dampener$/i.test(sf)) return done("Vibration Dampener", "Special Features text: vibration dampener");
     if (/sealing plug/i.test(sf)) {
       const size = sf.match(/sz\.\s*(\d+)/i)?.[1];
