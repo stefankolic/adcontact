@@ -33,18 +33,24 @@ function ownSeo(item: OutletComponent): OutletSeo | null {
   const f = page.seo ?? {};
   const ways = f.ways ? `${f.ways}-Way${f.type ? ` ${f.type}` : ""}` : "";
   const known = Boolean(f.ways);
-  const shortTitle = ["Deutsch " + partNumber, f.series, ways].filter(Boolean).join(", ");
+  // Non-connector parts (adaptors): "Adaptor for HD30 Series, Size 24".
+  const kindText = f.kind ? [f.kind + (f.fitsSeries ? ` for ${f.fitsSeries}` : ""), f.shellSize ? `Size ${f.shellSize}` : ""].filter(Boolean).join(", ") : "";
+  const shortTitle = ["Deutsch " + partNumber, f.series, ways, kindText].filter(Boolean).join(", ");
   const title = known ? `${shortTitle}, connector, for wire processing` : shortTitle;
-  const descriptor = [f.series, ways].filter(Boolean).join(" ") || "part";
+  const descriptor = kindText || [f.series, ways].filter(Boolean).join(" ") || "part";
   const specs: [string, string][] = [["Part number", partNumber], ["Brand", "Deutsch"]];
+  if (f.kind) specs.push(["Type", f.kind]);
+  if (f.fitsSeries) specs.push(["For series", f.fitsSeries]);
   if (f.series) specs.push(["Series", f.series]);
   if (f.ways) specs.push(["No. of cavities", String(f.ways)]);
   if (f.type) specs.push(["Contact type", f.type]);
   if (f.shellSize) specs.push(["Shell size", f.shellSize]);
   specs.push(["Condition", "New, surplus stock"]);
-  const what = known ? `${f.series ? f.series + " " : ""}${f.ways}-way${f.type ? " " + f.type.toLowerCase() : ""} connector` : "Deutsch part";
+  const what = kindText ? kindText : known ? `${f.series ? f.series + " " : ""}${f.ways}-way${f.type ? " " + f.type.toLowerCase() : ""} connector` : "Deutsch part";
   const description = `${partNumber}: ${what}. Surplus outlet stock from Adcontact's Keila warehouse, EUR ${item.priceEur.toFixed(2)} per unit while quantities last. Buy online or request a quote.`;
-  const feedDescription = known
+  const feedDescription = kindText
+    ? `${partNumber}, ${kindText} from Deutsch. ${TAIL}`
+    : known
     ? `${partNumber}, ${f.series ? f.series + ", " : ""}${f.ways}-way${f.type ? ", " + f.type.toLowerCase() : ""} connector from Deutsch. ${TAIL}`
     : `${partNumber} from Deutsch. ${TAIL}`;
   return { title, shortTitle, descriptor, description, feedDescription, specs, kind: "own", basis: f.basis ?? "" };
