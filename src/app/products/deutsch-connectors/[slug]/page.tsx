@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ChevronRight, ArrowRight, Download, Phone, Mail, Clock, Package } from "lucide-react";
 import type { Metadata } from "next";
 import { getProductDetail, type RelatedProduct, type DrawingFile } from "@/data/deutschProductDetails";
-import { deutschProducts, seriesLabelFor, deutschSeoTitle, REFERENCE_IMAGE_PARTS } from "@/data/deutschConnectors";
+import { deutschProducts, seriesLabelFor, seriesLabelForProduct, deutschSeoTitle, REFERENCE_IMAGE_PARTS } from "@/data/deutschConnectors";
 import { deutschOutletComponents } from "@/data/deutschOutlet";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { OutletStockBlock } from "@/components/outlet/OutletStockBlock";
@@ -35,7 +35,7 @@ function productDescription(
   if (detail) {
     return `${cp.partNumber}: ${detail.specs["Series"] ?? "Deutsch"} sealed connector, ${detail.specs["No. of cavities"] ?? ""} way, contact size ${detail.specs["Contact Size"] ?? ""}. Request a quote from Adcontact Sweden.`;
   }
-  return `${cp.partNumber}: ${seriesLabelFor(cp.series)} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
+  return `${cp.partNumber}: ${seriesLabelForProduct(cp)} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -247,8 +247,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const outletListing = deutschOutletComponents.find(
     (o) => o.matchedPartNumber?.toUpperCase() === partNumber.toUpperCase(),
   );
-  const seriesLabel = seriesLabelFor(catalogueProduct.series);
-  const seriesColor = SERIES_COLORS[catalogueProduct.series] ?? "bg-slate-50 text-slate-700 border-slate-200";
+  const seriesLabel = seriesLabelForProduct(catalogueProduct);
+  // The dataset's series code and colour only apply when the label was not corrected from the specs (AMPSEAL).
+  const seriesFromCode = seriesLabel === seriesLabelFor(catalogueProduct.series);
+  const seriesChip = seriesFromCode ? catalogueProduct.series : seriesLabel.replace(/\s*Series$/i, "");
+  const seriesColor = (seriesFromCode ? SERIES_COLORS[catalogueProduct.series] : undefined) ?? "bg-slate-50 text-slate-700 border-slate-200";
 
   // Pull Magento catalogue data for every product — provides specs, contacts, accessories, files.
   const magentoProduct = findCatalogueProductByReference(partNumber);
@@ -403,7 +406,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${seriesColor}`}>
-                {catalogueProduct.series}
+                {seriesChip}
               </span>
               {catalogueProduct.ways !== null && (
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
