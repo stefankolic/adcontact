@@ -1,6 +1,7 @@
 import { OUTLET_OWN_PAGES, outletDisplayName, type OutletComponent } from "@/data/deutschOutlet";
 import { OUTLET_CATALOGUE_PAGES } from "@/data/outletCatalogueLinks";
 import { getCatalogueProduct } from "@/lib/magentoCatalogue";
+import { catalogueDescriptor } from "@/data/catalogueTitles";
 
 // Server-side only: reads the Magento catalogue. One source for the SEO title,
 // the meta description and the specification rows of every outlet part that has
@@ -12,7 +13,7 @@ import { getCatalogueProduct } from "@/lib/magentoCatalogue";
 export type OutletSeo = {
   /** Full title used as the page H1 and the JSON-LD name. */
   title: string;
-  /** The same without the trailing ", connector, for wire processing" (the feed's short format). */
+  /** The same without the trailing ", for wire processing" (and ", connector"): the feed's short format. */
   shortTitle: string;
   /** Plain descriptor, e.g. "6-Way Socket" or "Size 16 Pin Contact". */
   descriptor: string;
@@ -36,7 +37,7 @@ function ownSeo(item: OutletComponent): OutletSeo | null {
   // Non-connector parts (adaptors): "Adaptor for HD30 Series, Size 24".
   const kindText = f.kind ? [f.kind + (f.fitsSeries ? ` for ${f.fitsSeries}` : ""), f.shellSize ? `Size ${f.shellSize}` : ""].filter(Boolean).join(", ") : "";
   const shortTitle = ["Deutsch " + partNumber, f.series, ways, kindText].filter(Boolean).join(", ");
-  const title = known ? `${shortTitle}, connector, for wire processing` : shortTitle;
+  const title = `${shortTitle}${known ? ", connector" : ""}, for wire processing`;
   const descriptor = kindText || [f.series, ways].filter(Boolean).join(" ") || "part";
   const specs: [string, string][] = [["Part number", partNumber], ["Brand", "Deutsch"]];
   if (f.kind) specs.push(["Type", f.kind]);
@@ -59,15 +60,6 @@ function ownSeo(item: OutletComponent): OutletSeo | null {
   return { title, shortTitle, descriptor, description, feedDescription, specs, kind: "own", basis: f.basis ?? "" };
 }
 
-const title = (w: string) => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w);
-
-/** "Keying Pin size 12 yellow" gives "Keying Pin, Size 12, Yellow"; other notes only get capitalised words. */
-function tidyNote(note: string): string {
-  const m = note.match(/^(.*?)\s+size\s+(\d+)(?:\s+([A-Za-z]+))?$/i);
-  if (m) return [m[1].split(" ").map(title).join(" "), `Size ${m[2]}`, m[3] ? title(m[3]) : ""].filter(Boolean).join(", ");
-  return note.split(" ").map(title).join(" ");
-}
-
 const has = (v: unknown): v is string => typeof v === "string" && v.trim() !== "" && v.trim() !== "-";
 
 function catalogueSeo(item: OutletComponent): OutletSeo | null {
@@ -80,37 +72,9 @@ function catalogueSeo(item: OutletComponent): OutletSeo | null {
   const shown = outletDisplayName(item);
   const note = shown.toLowerCase().startsWith(pn.toLowerCase()) ? shown.slice(pn.length).trim() : "";
   const routeType = link.route.split("/")[3] ?? "";
-  const isContact = routeType === "contacts";
-  const isConnector = /connectors/.test(routeType);
-  let descriptor = "";
-  let basis = "";
-  let connector = false;
-  let feedText = "";
-  if (isContact && has(a["Holds Pin/Socket"]) && has(a["Contact Size"])) {
-    descriptor = `Size ${a["Contact Size"]} ${a["Holds Pin/Socket"]} Contact`;
-    basis = "Contact size and pin/socket from the catalogue specifications";
-  } else if (isConnector && has(a["No. of cavities"]) && (has(a["Holds Pin/Socket"]) || has(a["Connector Style"]))) {
-    const type = has(a["Holds Pin/Socket"]) ? a["Holds Pin/Socket"] : a["Connector Style"];
-    const series = has(a["Series"]) ? a["Series"] : "";
-    descriptor = [series, `${a["No. of cavities"]}-Way ${type}`].filter(Boolean).join(", ");
-    feedText = `${pn}, ${series ? series + ", " : ""}${a["No. of cavities"]}-way, ${type.toLowerCase()} connector`;
-    basis = "Series, cavities and pin/socket from the catalogue specifications";
-    connector = true;
-  } else if (has(a["Accessory Type"])) {
-    descriptor = [a["Accessory Type"], has(a["Contact Size"]) ? `Size ${a["Contact Size"]}` : "", has(a["Color"]) ? a["Color"] : ""].filter(Boolean).join(", ");
-    basis = "Accessory type, size and colour from the catalogue specifications";
-  } else if (note) {
-    descriptor = tidyNote(note);
-    basis = "Text from the outlet stock sheet (the catalogue has no descriptive specification)";
-  } else if (has(a["No. of cavities"]) && has(a["Connector Style"])) {
-    descriptor = `Accessory for ${a["No. of cavities"]}-way ${a["Connector Style"].toLowerCase().replace(/,\s*/g, " or ")}`;
-    basis = "Catalogue lists cavities and connector style on this accessory; read as the connector it fits, please confirm";
-  } else {
-    descriptor = "Accessory";
-    basis = "No descriptive data in the catalogue or the stock sheet";
-  }
+  const { descriptor, basis, connector, feedText } = catalogueDescriptor(a, { pn, routeType, note, allowWeak: true })!;
   const shortTitle = `Deutsch ${pn}, ${descriptor}`;
-  const title = connector ? `${shortTitle}, connector, for wire processing` : shortTitle;
+  const title = `${shortTitle}${connector ? ", connector" : ""}, for wire processing`;
   const specs: [string, string][] = [["Part number", pn], ["Brand", "Deutsch"]];
   const extra = ["Series", "Accessory Type", "Contact Size", "Holds Pin/Socket", "Current Rating", "No. of cavities", "Connector Style", "Shell Size", "Color", "Material"] as const;
   for (const k of extra) if (has(a[k])) specs.push([k === "Current Rating" ? "Current rating (A)" : k, a[k]]);

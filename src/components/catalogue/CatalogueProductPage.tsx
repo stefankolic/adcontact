@@ -9,6 +9,7 @@ import { outletItemForCatalogueProduct } from "@/data/deutschOutlet";
 import { OUTLET_CATALOGUE_PAGES } from "@/data/outletCatalogueLinks";
 import { outletSoldOut } from "@/data/outletStock";
 import { outletSeo } from "@/data/outletSeo";
+import { deutschCatalogueSeo } from "@/data/catalogueTitles";
 import { CHECKOUT_ELIGIBLE_SKUS } from "@/data/outletCheckoutPilot";
 import { productJsonLd } from "@/lib/productSchema";
 import { normalizeLegacyHtml, stripLegacyHtml, stripInlineStyles } from "@/lib/legacyHtml";
@@ -166,7 +167,9 @@ export default function CatalogueProductPage({
   const outlet = outletItemForCatalogueProduct(product.id);
   const outletLink = outlet ? OUTLET_CATALOGUE_PAGES[outlet.sku] : undefined;
   const outletSeoData = outlet ? outletSeo(outlet) : null;
-  const title = outletSeoData?.title ?? titleForProduct(product);
+  // Regular Deutsch contact, accessory and tool pages get a spec-based heading too; without facts the bare part number stays.
+  const generalSeo = outlet ? null : deutschCatalogueSeo(product);
+  const title = outletSeoData?.title ?? generalSeo?.title ?? titleForProduct(product);
   const outletLd =
     outlet && outletLink && primaryImage
       ? productJsonLd({
