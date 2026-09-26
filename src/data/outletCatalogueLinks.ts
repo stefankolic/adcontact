@@ -47,8 +47,8 @@ export const OUTLET_CATALOGUE_PAGES: Record<string, OutletCatalogueLink> = {
   "243132-4091": { productId: 3868, partNumber: "0515-015-4005", route: "/webshop/components/accessories/deutsch/0515-015-4005.html", image: "/media/catalog/product/0/5/0515-015-4005_1.jpg" }, // 0515-015-4005
   "244000-005": { productId: 4167, partNumber: "HD10-5-GKT", route: "/webshop/components/accessories/deutsch/hd10-5-gkt.html", image: "/media/catalog/product/H/D/HD10-5-GKT_1.jpg" }, // HD10-5-GKT
   "244000-006": { productId: 4170, partNumber: "HD10-6-GKT", route: "/webshop/components/accessories/deutsch/hd10-6-gkt.html", image: "/media/catalog/product/H/D/HD10-6-GKT_1.jpg" }, // HD10-6-GKT
-  "244031-01": { productId: 3834, partNumber: "0409-201-2400", route: "/webshop/components/accessories/deutsch/0409-201-2400.html", image: "/media/catalog/product/0/4/0409-201-2400_1.jpg" }, // 0409-201-2400
+  "244031-01": { productId: 3834, partNumber: "0409-201-2400", route: "/webshop/components/accessories/deutsch/0409-201-2400.html", image: "/media/outlet-components/0409-201-2400.jpg" }, // 0409-201-2400
   "245016-030": { productId: 4190, partNumber: "HDC16-3", route: "/webshop/components/accessories/deutsch/hdc16-3.html", image: "/media/catalog/product/H/D/HDC16-3_1.jpg" }, // HDC 16-3
-  "245016-050": { productId: 4193, partNumber: "HDC16-5", route: "/webshop/components/accessories/deutsch/hdc16-5.html", image: "/media/catalog/product/H/D/HDC16-5_1.jpg" }, // HDC 16-5
-  "245018-003": { productId: 4174, partNumber: "HD18-003", route: "/webshop/components/accessories/deutsch/hd18-003.html", image: "/media/catalog/product/H/D/HD18-003_1.jpg" }, // HD 18-003
+  "245016-050": { productId: 4193, partNumber: "HDC16-5", route: "/webshop/components/accessories/deutsch/hdc16-5.html", image: "/media/outlet-components/hdc16-5.jpg" }, // HDC 16-5
+  "245018-003": { productId: 4174, partNumber: "HD18-003", route: "/webshop/components/accessories/deutsch/hd18-003.html", image: "/media/outlet-components/hd18-003.jpg" }, // HD 18-003
 };

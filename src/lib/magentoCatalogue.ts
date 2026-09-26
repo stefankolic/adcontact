@@ -318,6 +318,10 @@ type ProductOverride = Partial<
 export const PRODUCT_OVERRIDES: Record<number, ProductOverride> = {
   // HDP24-24-18SE-L017 had no real photo (no_photo placeholder); Stefan supplied one.
   3465: { image: "/media/featured-products/hdp24-24-18se-l017.webp" },
+  // Stefan supplied cleaner product shots (2026-09-27) for three outlet parts; the old catalogue photos were 640x480.
+  3834: { image: "/media/outlet-components/0409-201-2400.jpg" }, // 0409-201-2400 cable clamp
+  4174: { image: "/media/outlet-components/hd18-003.jpg" }, // HD18-003 backshell
+  4193: { image: "/media/outlet-components/hdc16-5.jpg" }, // HDC16-5 dust cap
   // The Branson 2032S slot is presented as the current Branson GMX-W1 wire splicer.
   22940: {
     name: "Branson GMX-W1 Wire Splicer",
