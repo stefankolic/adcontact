@@ -35,7 +35,7 @@ export const brands: Brand[] = [
     slug: "deutsch",
     logo: "/images/partners/te-connectivity.svg",
     description:
-      "DEUTSCH is TE Connectivity's family of sealed connectors, the global benchmark for harsh-environment electrical connections. The DT, DTM, DTP, and AT series are specified in agriculture, construction, military, marine, and heavy automotive applications where vibration, moisture, and contamination resistance are critical.",
+      "DEUTSCH is TE Connectivity's family of sealed connectors, the global benchmark for harsh-environment electrical connections. The DT, DTM, DTP, and AT series are specified in agriculture, construction, marine, and heavy automotive applications where vibration, moisture, and contamination resistance are critical.",
     shortDescription: "DEUTSCH sealed connectors for harsh-environment and off-highway applications.",
     categories: ["connectors"],
     linecardSection: "components",
