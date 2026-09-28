@@ -26,16 +26,44 @@ export function generateStaticParams() {
 
 type DeutschCatalogueProduct = (typeof deutschProducts)[number];
 
+// A fact is only used when it's a single, real value — never a comma list
+// (several cavity counts on one catalogue row) and never the "-" placeholder.
+const singleFact = (v: string | undefined): string =>
+  v && v.trim() && v.trim() !== "-" && !v.includes(",") ? v.trim() : "";
+
+/** "31 way, contact size 16, 13 A" from whichever spec dict is available
+ *  (the curated detail record, or the Magento catalogue attributes) — same
+ *  keys in both, so one function covers both sources. Unknown facts are
+ *  left out rather than guessed (spec-first, see spec-first-descriptions). */
+function factsClause(specs: Record<string, string | undefined> | undefined): string {
+  if (!specs) return "";
+  const cavities = singleFact(specs["No. of cavities"]);
+  const contactSize = singleFact(specs["Contact Size"]);
+  const currentRating = singleFact(specs["Current Rating"]);
+  return [
+    cavities && `${cavities} way`,
+    contactSize && `contact size ${contactSize}`,
+    currentRating && `${currentRating} A`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
 /** One source of truth for the part's one-line description — used for both the
- *  meta description and the Product schema so the two never drift apart. */
+ *  meta description and the Product schema so the two never drift apart.
+ *  Prefers the curated detail record's specs, then the Magento catalogue
+ *  attributes (most of the 1,794 pages have one or the other), then falls
+ *  back to the dataset's own bare series/ways when neither exists. */
 function productDescription(
   cp: DeutschCatalogueProduct,
   detail: ReturnType<typeof getProductDetail>,
+  magentoProduct: CatalogueProduct | undefined,
 ): string {
-  if (detail) {
-    return `${cp.partNumber}: ${detail.specs["Series"] ?? "Deutsch"} sealed connector, ${detail.specs["No. of cavities"] ?? ""} way, contact size ${detail.specs["Contact Size"] ?? ""}. Request a quote from Adcontact Sweden.`;
-  }
-  return `${cp.partNumber}: ${seriesLabelForProduct(cp)} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
+  const series = detail ? (detail.specs["Series"] ?? "Deutsch") : seriesLabelForProduct(cp);
+  const facts =
+    factsClause(detail?.specs ?? (magentoProduct?.attributes as Record<string, string> | undefined)) ||
+    (cp.ways ? `${cp.ways}-way` : "");
+  return `${cp.partNumber}: ${series} sealed connector${facts ? `, ${facts}` : ""}. Request a quote from Adcontact Sweden.`;
 }
 
 /** Same shape as productDescription, but for a part that also has live outlet
@@ -52,6 +80,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const catalogueProduct = deutschProducts.find((p) => p.partNumber.toLowerCase() === slug);
   if (!catalogueProduct) return {};
   const detail = getProductDetail(slug);
+  const magentoProduct = findCatalogueProductByReference(catalogueProduct.partNumber);
   // A part matched to live, in-stock outlet inventory gets outlet-aware title
   // and description text (same as the own outlet pages and the 38 catalogue-
   // linked ones) instead of the generic "request a quote" copy — Stefan found
@@ -67,7 +96,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${catalogueProduct.partNumber} | Deutsch Connector${liveOutlet ? " Outlet" : ""}`,
     description: liveOutlet
       ? outletProductDescription(catalogueProduct, liveOutlet.priceEur)
-      : productDescription(catalogueProduct, detail),
+      : productDescription(catalogueProduct, detail, magentoProduct),
     alternates: { canonical: `/products/deutsch-connectors/${slug}` },
   };
 }
@@ -340,7 +369,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     category: "Hardware > Power & Electrical Supplies > Wire Terminals & Connectors",
     description: liveOutletListing
       ? outletProductDescription(catalogueProduct, liveOutletListing.priceEur)
-      : productDescription(catalogueProduct, detail),
+      : productDescription(catalogueProduct, detail, magentoProduct),
     image: mainImage,
     url: pagePath,
     // Only the parts with real outlet stock carry a visible price on the page.
