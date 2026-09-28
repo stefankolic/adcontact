@@ -38,14 +38,36 @@ function productDescription(
   return `${cp.partNumber}: ${seriesLabelForProduct(cp)} sealed connector${cp.ways ? `, ${cp.ways}-way` : ""}. Request a quote from Adcontact Sweden.`;
 }
 
+/** Same shape as productDescription, but for a part that also has live outlet
+ *  stock: leads with the same facts, closes with the price and a call to buy
+ *  instead of "request a quote" — matches the outlet own-page description
+ *  format (outletSeo.ts) that measurably outranks the generic one. */
+function outletProductDescription(cp: DeutschCatalogueProduct, priceEur: number): string {
+  const wayType = cp.ways ? `, ${cp.ways}-way${cp.type ? ` ${cp.type.toLowerCase()}` : ""}` : "";
+  return `${cp.partNumber}: ${seriesLabelForProduct(cp)} sealed connector${wayType}. Surplus outlet stock from Adcontact's Keila warehouse, EUR ${priceEur.toFixed(2)} per unit while quantities last. Buy online or request a quote.`;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const catalogueProduct = deutschProducts.find((p) => p.partNumber.toLowerCase() === slug);
   if (!catalogueProduct) return {};
   const detail = getProductDetail(slug);
+  // A part matched to live, in-stock outlet inventory gets outlet-aware title
+  // and description text (same as the own outlet pages and the 38 catalogue-
+  // linked ones) instead of the generic "request a quote" copy — Stefan found
+  // this measurably affects ranking (DT16-6SB-KP01, outlet-aware, ranks #2
+  // behind TE; DT06-3S-P032, generic copy despite also being in stock, did
+  // not rank at all). Sold-out items keep the generic copy: no live price or
+  // "buy" claim to make.
+  const outletListing = deutschOutletComponents.find(
+    (o) => o.matchedPartNumber?.toUpperCase() === catalogueProduct.partNumber.toUpperCase(),
+  );
+  const liveOutlet = outletListing && !outletSoldOut(outletListing) ? outletListing : null;
   return {
-    title: `${catalogueProduct.partNumber} | Deutsch Connector`,
-    description: productDescription(catalogueProduct, detail),
+    title: `${catalogueProduct.partNumber} | Deutsch Connector${liveOutlet ? " Outlet" : ""}`,
+    description: liveOutlet
+      ? outletProductDescription(catalogueProduct, liveOutlet.priceEur)
+      : productDescription(catalogueProduct, detail),
     alternates: { canonical: `/products/deutsch-connectors/${slug}` },
   };
 }
