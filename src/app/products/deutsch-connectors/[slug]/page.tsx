@@ -31,38 +31,32 @@ type DeutschCatalogueProduct = (typeof deutschProducts)[number];
 const singleFact = (v: string | undefined): string =>
   v && v.trim() && v.trim() !== "-" && !v.includes(",") ? v.trim() : "";
 
-/** "31 way, contact size 16, 13 A" from whichever spec dict is available
- *  (the curated detail record, or the Magento catalogue attributes) — same
- *  keys in both, so one function covers both sources. Unknown facts are
- *  left out rather than guessed (spec-first, see spec-first-descriptions). */
-function factsClause(specs: Record<string, string | undefined> | undefined): string {
-  if (!specs) return "";
-  const cavities = singleFact(specs["No. of cavities"]);
-  const contactSize = singleFact(specs["Contact Size"]);
-  const currentRating = singleFact(specs["Current Rating"]);
-  return [
-    cavities && `${cavities} way`,
-    contactSize && `contact size ${contactSize}`,
-    currentRating && `${currentRating} A`,
-  ]
-    .filter(Boolean)
-    .join(", ");
-}
-
 /** One source of truth for the part's one-line description — used for both the
  *  meta description and the Product schema so the two never drift apart.
- *  Prefers the curated detail record's specs, then the Magento catalogue
- *  attributes (most of the 1,794 pages have one or the other), then falls
- *  back to the dataset's own bare series/ways when neither exists. */
+ *  Builds "31 way, contact size 16, 13 A" from whichever spec dict is
+ *  available (the curated detail record, or the Magento catalogue
+ *  attributes — same key names in both). The dataset's own `ways` covers a
+ *  handful of parts whose Magento record has no cavity count at all (e.g.
+ *  DTMF15-48P); contact size and current rating have no such fallback, since
+ *  the dataset doesn't carry them. Unknown facts are left out rather than
+ *  guessed (spec-first, see spec-first-descriptions). */
 function productDescription(
   cp: DeutschCatalogueProduct,
   detail: ReturnType<typeof getProductDetail>,
   magentoProduct: CatalogueProduct | undefined,
 ): string {
   const series = detail ? (detail.specs["Series"] ?? "Deutsch") : seriesLabelForProduct(cp);
-  const facts =
-    factsClause(detail?.specs ?? (magentoProduct?.attributes as Record<string, string> | undefined)) ||
-    (cp.ways ? `${cp.ways}-way` : "");
+  const specs = detail?.specs ?? (magentoProduct?.attributes as Record<string, string> | undefined);
+  const cavities = singleFact(specs?.["No. of cavities"]) || (cp.ways ? String(cp.ways) : "");
+  const contactSize = singleFact(specs?.["Contact Size"]);
+  const currentRating = singleFact(specs?.["Current Rating"]);
+  const facts = [
+    cavities && `${cavities} way`,
+    contactSize && `contact size ${contactSize}`,
+    currentRating && `${currentRating} A`,
+  ]
+    .filter(Boolean)
+    .join(", ");
   return `${cp.partNumber}: ${series} sealed connector${facts ? `, ${facts}` : ""}. Request a quote from Adcontact Sweden.`;
 }
 
