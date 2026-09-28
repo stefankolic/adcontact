@@ -330,12 +330,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const pagePath = `/products/deutsch-connectors/${slug}`;
   const seoTitle = deutschSeoTitle(catalogueProduct);
+  // Same outlet-aware description as generateMetadata (below), kept in sync so the JSON-LD
+  // Product.description and the <meta name="description"> tag never disagree with each other.
+  const liveOutletListing = outletListing && !outletSoldOut(outletListing) ? outletListing : null;
   const productLd = productJsonLd({
     name: seoTitle,
     partNumber,
     brand: "Deutsch",
     category: "Hardware > Power & Electrical Supplies > Wire Terminals & Connectors",
-    description: productDescription(catalogueProduct, detail),
+    description: liveOutletListing
+      ? outletProductDescription(catalogueProduct, liveOutletListing.priceEur)
+      : productDescription(catalogueProduct, detail),
     image: mainImage,
     url: pagePath,
     // Only the parts with real outlet stock carry a visible price on the page.
